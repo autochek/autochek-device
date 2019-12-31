@@ -11,9 +11,6 @@ const UUID_CHAR_READ = '2a49';
 
 
 export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
-    autoconnect = false;
-
-
 
     constructor(protected service: CordovaBpmeterService, id: string, name: string, extra?: object) {
         super(service.ble, id, name, extra);
@@ -91,6 +88,7 @@ export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
         // Byte[16] uid = 0
         // Byte[17:18] flags = 0x 04 00 = 0b 00000100 00000000
 
+        //1e 86 00 47 00 66 00 [e107] [02][0c][07][14][00][50]00000000
 
 
         this.startNotification(UUID_SERVICE, UUID_CHAR_NOTIFY).subscribe(
@@ -109,7 +107,14 @@ export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
                 data.diastolic = diastolic;
                 data.mean = mean;
                 data.rate = rate;
-                data.date = new Date();
+
+                const year = ub[8]*0x100 + ub[7];
+                const month = ub[9]-1;
+                const date = ub[10];
+                const hour = ub[11];
+                const minute = ub[12];
+                const second = ub[13]
+                data.date = new Date(year, month, date, hour, minute, second);
 
                 this.service.putBloodpressureMeasurement(data);
 
