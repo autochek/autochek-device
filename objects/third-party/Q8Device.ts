@@ -6,7 +6,7 @@ import {
     PedometerDaySummary, PedometerTimeSegment, PedometerSleepSummary, PedometerSleepSegment,
     PedometerHeartrateSegment
 } from 'autochek-base/objects/device-data-object';
-import { CordovaPedometerService } from 'src/autochek-device/services/cordova-pedometer.service';
+import { CordovaPedometerService } from 'autochek-device/services/cordova-pedometer.service';
 
 
 
@@ -27,7 +27,7 @@ export class Q8Device extends PedometerDeviceBase {
     private com_acker: Subject<any>;
     private com_is_acked: number;
 
-
+    private logLevel:number = 1;
 
 
 
@@ -62,6 +62,12 @@ export class Q8Device extends PedometerDeviceBase {
     constructor(protected service: CordovaPedometerService, id: string, name: string, extra?: object) {
         super(service.ble, id, name, extra);
         this.class_name = 'Q8Device';
+
+
+        // this.com_l1_queue = [];
+        // this.com_acker = new Subject<any>();
+        // this.com_is_acked = -1;
+        // ACK_OFFSET = 0;
     }
 
 
@@ -116,6 +122,10 @@ export class Q8Device extends PedometerDeviceBase {
     }
 
     async sync_callback(): Promise<boolean> {
+        
+        if(!this.com_acker){
+            this.general_connection_callback();
+        }
         if (this.sync_promise_response != null) {
             return false;
         }
@@ -160,6 +170,7 @@ export class Q8Device extends PedometerDeviceBase {
         this.com_acker = new Subject<any>();
         this.com_is_acked = -1;
         ACK_OFFSET = 0;
+
         this.connection_phase = 0;
         // this.connection_result = new Promise<boolean>((res,rej)=>{});
 
@@ -178,20 +189,20 @@ export class Q8Device extends PedometerDeviceBase {
                 }
 
                 if (!l1Collector.isFull()) {
-                    console.log(0, 'L1 packet is not complete. wait for the next packet');
+                    this.leveledLog(0, 'L1 packet is not complete. wait for the next packet');
                     return;
                 }
 
                 if (l1Collector.isAckPacket()) {
-                    console.log(0, 'Received ack : ' + x2s(l1Collector.ack));
+                    this.leveledLog(0, 'Received ack : ' + x2s(l1Collector.ack));
 
                     this.com_is_acked = l1Collector.ack;
                     this.com_acker.next();
                 } else {
-                    console.log(0, 'Received full L1 packet' + l1Collector);
+                    this.leveledLog(0, 'Received full L1 packet' + l1Collector);
                     const l2received = l1Collector.genL2Packet();
 
-                    console.log(1, 'Recieved l2 packet ' + l2received);
+                    this.leveledLog(1, 'Recieved l2 packet ' + l2received);
                     this.writeAck(l1Collector.ack); // return ack
                     this.handle_notified_l2(l2received);
 
@@ -212,8 +223,8 @@ export class Q8Device extends PedometerDeviceBase {
                     return;
                 }
                 const l1pack = this.com_l1_queue.shift();
-                console.log(0, 'Actual L1 packet sending ' + l1pack);
-                console.log(1, 'Writing L2 ' + l1pack.genL2Packet());
+                this.leveledLog(0, 'Actual L1 packet sending ' + l1pack);
+                this.leveledLog(1, 'Writing L2 ' + l1pack.genL2Packet());
 
                 l1pack.genPacketSegments().forEach((ps: PacketSegment) => {
                     this.writeToDevice(ps);
@@ -225,7 +236,7 @@ export class Q8Device extends PedometerDeviceBase {
 
 
     private handle_notified_l2(packet: L2Packet) {
-        // console.log(1, 'Recieved packet value : ', packet.value);
+        // this.leveledLog(1, 'Recieved packet value : ', packet.value);
         if (packet.cmdid === 3) {
             if (packet.keyid === 2 || packet.keyid === 4) {
                 // Connection success. First or repeat. whatever
@@ -323,13 +334,13 @@ export class Q8Device extends PedometerDeviceBase {
                         break;
 
                     case 5: // Heartrate
-                        // console.log(2, this.historyBpData);
+                        // this.leveledLog(2, this.historyBpData);
                         this.pedometerHeartrateSegments = this.parseHeartrate(this.historyBpData);
                         this.historyBpData = '';
                         break;
 
                     case 6: // Excs
-                        console.log(2, this.historyExcsData);
+                        this.leveledLog(2, this.historyExcsData);
                         this.historyExcsData = '';
 
                         break;
@@ -351,7 +362,7 @@ export class Q8Device extends PedometerDeviceBase {
                 const step: number = parseInt(packet.value.substring(0, 8), 16);
                 const dist: number = parseInt(packet.value.substring(8, 16), 16);
                 const cal: number = parseInt(packet.value.substring(16, 24), 16);
-                // console.log(2, 'Today's summary', date, step, dist, cal);
+                this.leveledLog(2, "Today's summary', date, step, dist, cal");
                 this.pushProgressString('오늘의 요약정보를 받았습니다');
                 this.pedometerDaySummaries.push(new PedometerDaySummary(date, step, cal, dist));
 
@@ -390,7 +401,7 @@ export class Q8Device extends PedometerDeviceBase {
             const d_date: Date = parseDateBlock(value.substring(4, 8));
             const i_minute: number = parseInt(value.substring(8, 12), 16);
 
-            console.log(1, 'act segment chunk', d_date, i_minute, length);
+            this.leveledLog(1, 'act segment chunk', d_date, i_minute, length);
             const e_idx = 16 + 4 * length;
 
             const subvalue: string = value.substring(16, e_idx);
@@ -401,16 +412,16 @@ export class Q8Device extends PedometerDeviceBase {
                 }
                 const step = parseInt(subvalue.substring(i * 4, i * 4 + 4), 16);
                 let minute = i_minute + i * 5;
-                console.log(1, 'Parsing datetime log[0]', i_minute, i, minute);
+                this.leveledLog(1, 'Parsing datetime log[0]', i_minute, i, minute);
                 const hour = Math.floor(minute / 60);
                 minute = minute % 60;
 
-                console.log(1, 'Parsing datetime log[1]', hour, minute);
+                this.leveledLog(1, 'Parsing datetime log[1]', hour, minute);
                 const d = new Date(d_date);
                 d.setHours(hour);
                 d.setMinutes(minute);
                 d.setSeconds(0);
-                console.log(1, 'Parsing datetime log[2]', d);
+                this.leveledLog(1, 'Parsing datetime log[2]', d);
                 segments.push(new PedometerTimeSegment(d, 5, step, step * 47.423, 0.76 * step));
             }
 
@@ -437,7 +448,7 @@ export class Q8Device extends PedometerDeviceBase {
 
             const nextdate = moment(date).add(1, 'day').toDate();
             const sleepSummary: PedometerSleepSummary = new PedometerSleepSummary(nextdate, deepsleep, lightsleep);
-            console.log(2, `Sleep report - deep:${deepsleep}, light:${lightsleep}`);
+            this.leveledLog(2, `Sleep report - deep:${deepsleep}, light:${lightsleep}`);
             sleepSummaries.push(sleepSummary);
             value = value.substring(12);
         }
@@ -514,13 +525,13 @@ export class Q8Device extends PedometerDeviceBase {
 
     private writeToDevice(packet: PacketSegment) {
         super.write(UUID_SERVICE, UUID_CHAR_WRITE, packet.buffer).then(
-            () => { console.log(0, 'write packet success ' + packet); },
-            (err) => { console.log(0, 'write packet err' + packet + ' err-code: ' + err); }
+            () => { this.leveledLog(0, 'write packet success ' + packet); },
+            (err) => { this.leveledLog(0, 'write packet err' + packet + ' err-code: ' + err); }
         );
     }
 
     private writeAck(num: number) {
-        console.log(1, 'Sending Ack ' + x2s(num));
+        this.leveledLog(1, 'Sending Ack ' + x2s(num));
         const l1 = new L1Packet(num).genSinglePacketSegment();
         this.writeToDevice(l1);
 
@@ -548,6 +559,12 @@ export class Q8Device extends PedometerDeviceBase {
     private configDrinkingWater(enable: boolean, interval: number, start: number, end: number) {
         const value = `${enable ? '01' : '00'}${x2s(interval, 4)}${x2s(start, 4)}${x2s(end, 4)}`;
         this.writeL2(value, 2, 0x35);
+    }
+
+    private leveledLog(level:number, ...args) {
+        if(this.logLevel >= level) {
+            console.log(args);
+        }
     }
 
 
@@ -651,7 +668,7 @@ class PacketSegment extends PacketBase {
         }
 
         if (parent) {
-            // console.log('PacketSegment '+super.toString()+' was made from '+parent.toString());
+            // this.leveledLog('PacketSegment '+super.toString()+' was made from '+parent.toString());
             this.parent = parent.toString();
         } else {
             this.parent = '';

@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 
 
 
-import { CordovaBodyscaleService } from 'src/autochek-device/services/cordova-bodyscale.service';
+import { CordovaBodyscaleService } from 'autochek-device/services/cordova-bodyscale.service';
 import { BodyscaleDeviceBase } from '../base/BodyscaleDeviceBase';
 import { BodyscaleMeasurement } from 'autochek-base/objects/device-data-object';
 

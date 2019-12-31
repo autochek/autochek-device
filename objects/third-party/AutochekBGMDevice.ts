@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 import * as moment from 'moment';
 import { GlucosemeterDeviceBase } from '../base/GlucosemeterDeviceBase';
 import { GlucosemeterMeasurement } from 'autochek-base/objects/device-data-object';
-import { CordovaGlucosemeterService } from 'src/autochek-device/services/cordova-glucosmeter.service';
+import { CordovaGlucosemeterService } from 'autochek-device/services/cordova-glucosmeter.service';
 
 
 
@@ -101,6 +101,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
                 // let max_record_number:number = parseInt(bigLittleConversion(hex.substring(4)), 16);
 
                 this.writeHex(UUID_SERVICE_GLUCOSE, UUID_CHARACTERISTIC_RACP, '0101'); // Get all
+                console.log('get all!')
 
             }
 
@@ -110,6 +111,10 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
             if (hex.startsWith('06000106')) { // Tear procedure
                 this.writeHex(UUID_SERVICE_GLUCOSE, UUID_CHARACTERISTIC_RACP, '06000106');
+                console.log('get full record done');
+                
+                // this.service.putGlucosemeterMeasurements(this.glucosemeterMeasurements);
+                // this.glucosemeterMeasurements = [];
                 this.getrecord_success(true);
                 // this.deviceDataProvider.dataSynced();
                 
@@ -151,6 +156,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
     }
 
     private async getRecordFull() {
+        console.log('get record full was called');
         this.glucosemeterMeasurements = [];
 
         const promise = new Promise<boolean>((res, rej) => {

@@ -21,8 +21,9 @@ import { CordovaGlucosemeterService } from './cordova-glucosmeter.service';
 import { CordovaPedometerService } from './cordova-pedometer.service';
 import { CordovaBpmeterService } from './cordova-bpmeter.service';
 import { CordovaBodyscaleService } from './cordova-bodyscale.service';
-import { Q8Device } from 'src/autochek-device/objects/third-party/Q8Device';
-import { PedometerDeviceBase } from 'src/autochek-device/objects/base/PedometerDeviceBase';
+import { Q8Device } from 'autochek-device/objects/third-party/Q8Device';
+import { PedometerDeviceBase } from 'autochek-device/objects/base/PedometerDeviceBase';
+import { AutochekSignatureBpmeter } from 'autochek-device/objects/third-party/AutochekSignagureBpmeter';
 
 
 
@@ -40,7 +41,7 @@ const deviceList = {
     // ChipseaScaleDevice
   ],
   bpmeter: [
-    // AutochekSignatureBpmeter
+    AutochekSignatureBpmeter
   ],
 
 };
@@ -163,7 +164,7 @@ export class DeviceInfoProvider {
     // this.loggerFirestoreService.logMsg('deviceInfoProvider - starts scan')
     this.ble.startScan([]).subscribe(
       (data) => {
-        // console.log('testscan data', data);
+        console.log('testscan data', data);
         if (foundDevice.has(data.id)) {
           return;
         }

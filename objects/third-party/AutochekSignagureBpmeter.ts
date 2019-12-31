@@ -1,5 +1,5 @@
 import { BloodpressureDeviceBase } from '../base/BloodpressureDeviceBase';
-import { CordovaBpmeterService } from 'src/autochek-device/services/cordova-bpmeter.service';
+import { CordovaBpmeterService } from 'autochek-device/services/cordova-bpmeter.service';
 import { BloodpressureMeasurement } from 'autochek-base/objects/device-data-object';
 
 
