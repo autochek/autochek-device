@@ -273,7 +273,21 @@ export class DeviceInfoProvider {
           const tclass = new cs(this, '', '');
           console.log(tclass);
           if (tclass.class_name === dis.class_name) {
-            ncds[devicetype].push(new cs(this.cordovaServices[devicetype], dis.id, dis.name, dis.extra ? JSON.parse(dis.extra) : {}));
+            const device = new cs(this.cordovaServices[devicetype], dis.id, dis.name, dis.extra ? JSON.parse(dis.extra) : {});
+            ncds[devicetype].push(device);
+            console.log('device added to ConnectedDevices', device);
+            this.ble.isConnected(device.id).then(
+              () => {
+                device.setStaticStatus(EnumDeviceStaticStatus.Connected);
+                console.log('isConnected', device.id)
+              },
+              () => {
+                console.log('notConnected', device.id)
+              }
+            )
+
+
+
           }
 
         }
@@ -378,6 +392,10 @@ export class DeviceInfoProvider {
     } else {
       device.setStaticStatus(EnumDeviceStaticStatus.Connected);
     }
+
+    if (result && device.config.autoSyncAfterConnection) {
+      this.syncDevice(device);
+    }
     return result;
 
   }
@@ -410,6 +428,7 @@ export class DeviceInfoProvider {
     try {
       console.log('force disconnect from disconnectDevice');
       await this.ble.disconnect(device.id);
+      device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
       return true;
     } catch (error) {
       console.error(error);
@@ -430,15 +449,15 @@ export class DeviceInfoProvider {
   }
 
   public getDeviceFromId(deviceId: string): DeviceBase {
-    for(let dk in this.connectedDevices) {
+    for (let dk in this.connectedDevices) {
       const dls = this.connectedDevices[dk];
-      for(let d of dls) {
-        if (d.id===deviceId) {
+      for (let d of dls) {
+        if (d.id === deviceId) {
           return d;
         }
       }
     }
-    return  null;
+    return null;
   }
 
 }

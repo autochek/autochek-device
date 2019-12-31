@@ -17,6 +17,7 @@ export enum EnumDeviceDynamicStatus {
 export interface DeviceBaseConfig {
     noConnectionOnBond: boolean;
     setAutoConnection: boolean;
+    autoSyncAfterConnection: boolean;
 }
 
 export interface DeviceBase {
@@ -40,6 +41,7 @@ export abstract class DeviceBase {
     config: DeviceBaseConfig = {
         noConnectionOnBond: false,
         setAutoConnection: false,
+        autoSyncAfterConnection: false,
     };
 
 

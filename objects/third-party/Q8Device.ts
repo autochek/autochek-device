@@ -111,7 +111,7 @@ export class Q8Device extends PedometerDeviceBase {
         this.connection_promise_response = null;
 
 
-        this.sync_callback(); // TODO: Test required
+        // this.sync_callback(); // TODO: Test required
         return result;
     }
 
