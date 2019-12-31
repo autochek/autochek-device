@@ -27,7 +27,7 @@ export class Q8Device extends PedometerDeviceBase {
     private com_acker: Subject<any>;
     private com_is_acked: number;
 
-    private logLevel:number = 1;
+    private logLevel:number = 2;
 
 
 
@@ -236,7 +236,7 @@ export class Q8Device extends PedometerDeviceBase {
 
 
     private handle_notified_l2(packet: L2Packet) {
-        // this.leveledLog(1, 'Recieved packet value : ', packet.value);
+        this.leveledLog(1, 'Recieved packet value : ', packet.value);
         if (packet.cmdid === 3) {
             if (packet.keyid === 2 || packet.keyid === 4) {
                 // Connection success. First or repeat. whatever
@@ -362,7 +362,7 @@ export class Q8Device extends PedometerDeviceBase {
                 const step: number = parseInt(packet.value.substring(0, 8), 16);
                 const dist: number = parseInt(packet.value.substring(8, 16), 16);
                 const cal: number = parseInt(packet.value.substring(16, 24), 16);
-                this.leveledLog(2, "Today's summary', date, step, dist, cal");
+                this.leveledLog(2, "Today's summary", date, step, dist, cal);
                 this.pushProgressString('오늘의 요약정보를 받았습니다');
                 this.pedometerDaySummaries.push(new PedometerDaySummary(date, step, cal, dist));
 
@@ -562,8 +562,8 @@ export class Q8Device extends PedometerDeviceBase {
     }
 
     private leveledLog(level:number, ...args) {
-        if(this.logLevel >= level) {
-            console.log(args);
+        if(this.logLevel <= level) {
+            console.log(...args);
         }
     }
 
