@@ -27,11 +27,7 @@ export class Q8Device extends PedometerDeviceBase {
     private com_acker: Subject<any>;
     private com_is_acked: number;
 
-<<<<<<< HEAD
-    private logLevel: number = 1;
-=======
     private logLevel:number = 2;
->>>>>>> 4cb13b9d6d56933224884d86570345f6ba70ebde
 
 
 
