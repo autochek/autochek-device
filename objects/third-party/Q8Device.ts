@@ -27,7 +27,7 @@ export class Q8Device extends PedometerDeviceBase {
     private com_acker: Subject<any>;
     private com_is_acked: number;
 
-    private logLevel:number = 1;
+    private logLevel: number = 1;
 
 
 
@@ -122,8 +122,8 @@ export class Q8Device extends PedometerDeviceBase {
     }
 
     async sync_callback(): Promise<boolean> {
-        
-        if(!this.com_acker){
+
+        if (!this.com_acker) {
             this.general_connection_callback();
         }
         if (this.sync_promise_response != null) {
@@ -364,8 +364,9 @@ export class Q8Device extends PedometerDeviceBase {
                 const cal: number = parseInt(packet.value.substring(16, 24), 16);
                 this.leveledLog(2, "Today's summary', date, step, dist, cal");
                 this.pushProgressString('오늘의 요약정보를 받았습니다');
-                this.pedometerDaySummaries.push(new PedometerDaySummary(date, step, cal, dist));
-
+                const daySummary = new PedometerDaySummary(date, step, cal, dist);
+                this.pedometerDaySummaries.push(daySummary);
+                this.service.putLogToServer(`PedometerDaySummary of ${moment(daySummary.date).format('YYYYMMDD')} - ${daySummary.step}`);
                 this.writeL2('', 0x05, 0x23);
             }
             if (packet.keyid === 0x24) { // Sleep info (sequence..)
@@ -404,6 +405,12 @@ export class Q8Device extends PedometerDeviceBase {
             this.leveledLog(1, 'act segment chunk', d_date, i_minute, length);
             const e_idx = 16 + 4 * length;
 
+            let logStartDate: Date = null;
+            let logCount: number = 0;
+            let logEndDate: Date = null;
+
+
+
             const subvalue: string = value.substring(16, e_idx);
             for (let i = 0; i < length; i++) {
                 if ((i * 4 + 4) >= subvalue.length) {
@@ -421,9 +428,15 @@ export class Q8Device extends PedometerDeviceBase {
                 d.setHours(hour);
                 d.setMinutes(minute);
                 d.setSeconds(0);
+                logEndDate = d;
+                if (!logStartDate) {
+                    logStartDate = d;
+                }
+                logCount++;
                 this.leveledLog(1, 'Parsing datetime log[2]', d);
                 segments.push(new PedometerTimeSegment(d, 5, step, step * 47.423, 0.76 * step));
             }
+            this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
 
 
 
@@ -561,8 +574,8 @@ export class Q8Device extends PedometerDeviceBase {
         this.writeL2(value, 2, 0x35);
     }
 
-    private leveledLog(level:number, ...args) {
-        if(this.logLevel >= level) {
+    private leveledLog(level: number, ...args) {
+        if (this.logLevel >= level) {
             console.log(args);
         }
     }
@@ -795,7 +808,7 @@ function binaryToHex(bin: string): string {
 }
 
 function hexToBinary(hex: string): string {
-    return hex.match(/.{1,2}/g).map((s: string) =>  num2binary(parseInt(s, 16), 8) ).join('');
+    return hex.match(/.{1,2}/g).map((s: string) => num2binary(parseInt(s, 16), 8)).join('');
 }
 
 function bufferToHex(buffer) {
