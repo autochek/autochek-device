@@ -164,7 +164,7 @@ export class DeviceInfoProvider {
     // this.loggerFirestoreService.logMsg('deviceInfoProvider - starts scan')
     this.ble.startScan([]).subscribe(
       (data) => {
-        console.log('testscan data', data);
+        // console.log('testscan data', data);
         if (foundDevice.has(data.id)) {
           return;
         }

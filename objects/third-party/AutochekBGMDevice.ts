@@ -29,11 +29,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
         return devicename.includes('Auto-Chek');
     }
 
-    sync_callback(): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-
+    
     // connection_success = ()=>{};
     syncdate_success = (br: boolean) => { };
     getrecord_success = (br: boolean) => { };
@@ -41,6 +37,9 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
     constructor(protected service: CordovaGlucosemeterService, id: string, name: string, extra?: object) {
         super(service.ble, id, name, extra);
         this.class_name = 'AutochekBGMDevice';
+
+        this.config.autoSyncAfterConnection = true;
+    
     }
 
 
@@ -51,6 +50,11 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
     async repeated_connect_callback(): Promise<boolean> {
         await this.general_connect_precallback();
+        return true;
+        
+    }
+
+    async sync_callback(): Promise<boolean> {
         const res = await this.getRecordFull();
 
         if (res) {
@@ -59,8 +63,8 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
         }
 
         return res;
+        
     }
-
 
     async general_connect_precallback() {
         const modelnum: string = await this.readAscii(this.id, UUID_SERVICE_DEVICEINFO, UUID_CHARACTERISTIC_MODELNUMBER);
