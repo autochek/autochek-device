@@ -27,7 +27,7 @@ export class Q8Device extends PedometerDeviceBase {
     private com_acker: Subject<any>;
     private com_is_acked: number;
 
-    private logLevel:number = 2;
+    private logLevel: number = 2;
 
 
 
@@ -284,7 +284,7 @@ export class Q8Device extends PedometerDeviceBase {
         }
 
         if (packet.cmdid === 5) { // Data sync procedure
-            this.syncLogString += `[${packet.cmdid}] - [${packet.keyid}]\r\n${packet.value}\r\n`;
+            this.syncLogString += `[${packet.cmdid}] - [${packet.keyid}]||\r\n${packet.value}||\r\n`;
             if (packet.keyid === 0x15) { // realtime data
 
             }
@@ -366,7 +366,8 @@ export class Q8Device extends PedometerDeviceBase {
                 this.pushProgressString('오늘의 요약정보를 받았습니다');
                 const daySummary = new PedometerDaySummary(date, step, cal, dist);
                 this.pedometerDaySummaries.push(daySummary);
-                this.service.putLogToServer(`PedometerDaySummary of ${moment(daySummary.date).format('YYYYMMDD')} - ${daySummary.step}`);
+                // this.service.putLogToServer(`PedometerDaySummary of ${moment(daySummary.date).format('YYYYMMDD')} - ${daySummary.step}`);
+                this.syncLogString += `PedometerDaySummary of ${moment(daySummary.date).format('YYYYMMDD')} - ${daySummary.step}||\r\n`;
                 this.writeL2('', 0x05, 0x23);
             }
             if (packet.keyid === 0x24) { // Sleep info (sequence..)
@@ -417,7 +418,10 @@ export class Q8Device extends PedometerDeviceBase {
                     // TODO : there are several times... break;
                     break;
                 }
-                const step = parseInt(subvalue.substring(i * 4, i * 4 + 4), 16);
+                let step: number = parseInt(subvalue.substring(i * 4, i * 4 + 4), 16);
+                if (isNaN(step)) {
+                    step = 0;
+                }
                 let minute = i_minute + i * 5;
                 this.leveledLog(1, 'Parsing datetime log[0]', i_minute, i, minute);
                 const hour = Math.floor(minute / 60);
@@ -436,8 +440,8 @@ export class Q8Device extends PedometerDeviceBase {
                 this.leveledLog(1, 'Parsing datetime log[2]', d);
                 segments.push(new PedometerTimeSegment(d, 5, step, step * 47.423, 0.76 * step));
             }
-            this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
-
+            // this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
+            this.syncLogString += `PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}||\r\n`;
 
 
             value = value.substring(e_idx);
