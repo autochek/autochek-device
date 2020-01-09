@@ -113,10 +113,13 @@ export class QnScaleDevice extends BodyscaleDeviceBase {
                         bmi.weight = weight;
                         bmi.date = new Date();
                         this.service.putBodyscaleMeasurement(bmi);
+
+                        this.write(UUID_SERVICE, 'ffe3', Buffer.from('1f05151049','hex').buffer); //TODO what is it?
+                        // TODO : When byte[3]==01, write some kind of ack packet
+                    // Write ffe3 1F 05 15 10 49  
                         
                     }
-                    // TODO : When byte[3]==01, write some kind of ack packet
-                    // Write ffe3 1F 05 15 10 49  
+                    
 
 
                     realtimeWeight = weight;
