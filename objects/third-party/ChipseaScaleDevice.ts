@@ -68,32 +68,35 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
                 const packet: BodyscaleMeasurement = parsePacket(buffer);
                 const fixed: boolean = isFixed(buffer);
                 // this.logger.log(0, bufferToHex(buffer), `fixed?:${fixed}`)
+                console.log(bufferToHex(buffer), `fixed?:${fixed}`);
                 if (status === 0) {
 
                     // this.bodyscaleDataProvider.refreshBodyscaleRealtime(packet);
-                    // console.log(packet)
+                    console.log(packet)
                     if (fixed) {
                         status = 1;
 
                         if (hasBmiValue(buffer)) {
                             const bmi: BodyscaleMeasurement = parseBmi(buffer);
                             bmi.date = new Date();
-                            // bmi.bmi = this.bodyscaleDataProvider.calculateBmi(bmi.weight);
-                            // const userInfo = this.bodyscaleDataProvider.getUserInfo();
-                            // if (!userInfo.gender || userInfo.gender === 'male') {
-                            //     bmi.fat -= bmi.visceral * 0.98;
-                            // } else {
-                            //     bmi.fat -= bmi.visceral * 0.63;
-                            // }
+
+                            const scaleUser = this.service.getUser();
+                            bmi.bmi = calculateBmi(bmi.weight, scaleUser.height);
+                            
+                            if (scaleUser.gender === 'male') {
+                                bmi.fat -= bmi.visceral * 0.98;
+                            } else {
+                                bmi.fat -= bmi.visceral * 0.63;
+                            }
 
                             this.service.putBodyscaleMeasurement(bmi);
                             // this.bodyscaleDataProvider.addBodyscaleRecent(bmi);
 
-                            // console.log(bmi);
+                            console.log(bmi);
                         } else {
                             this.service.putBodyscaleMeasurement(packet);
                             // this.bodyscaleDataProvider.addBodyscaleRecent(packet);
-                            // console.log(packet);
+                            console.log(packet);
                         }
                     }
                 }
@@ -118,6 +121,15 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 }
 
+function calculateBmi(weight: number, height?: number) {
+    if (!height) {
+      height = this.backendProvider.getUserInfo().height
+    }
+
+    height = height / 100;
+    // console.log('caculated bmi : ',	 weight/(height*height))
+    return weight / (height * height);
+  }
 function bufferToHex(buffer) {
     return Array
         .from(new Uint8Array(buffer))
