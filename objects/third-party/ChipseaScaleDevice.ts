@@ -121,13 +121,11 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 }
 
-function calculateBmi(weight: number, height?: number) {
-    if (!height) {
-      height = this.backendProvider.getUserInfo().height
-    }
-
+function calculateBmi(weight: number, height: number) {
+    // console.log(`weight:${weight}, height:${height}`);
     height = height / 100;
     // console.log('caculated bmi : ',	 weight/(height*height))
+    // console.log(`bmi results : ${weight/(height*height)}`);
     return weight / (height * height);
   }
 function bufferToHex(buffer) {
