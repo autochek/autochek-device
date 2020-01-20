@@ -318,30 +318,6 @@ export class DeviceInfoProvider {
   }
 
 
-  async autoConnect(device: DeviceBase) {
-    const check: boolean = this.isDeviceBonded(device);
-    if (!check) {
-      return;
-    }
-    if (!device.isInStaticStatus(EnumDeviceStaticStatus.NotConnected)) {
-      return;
-    }
-
-
-    device.setStaticStatus(EnumDeviceStaticStatus.Autoconnecting);
-
-    this.ble.autoConnect(device.id,
-      () => {
-        this.connect_callback(device);
-      },
-      () => {
-        device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
-        console.log('disconnect callback after auto-connect');
-      }
-    );
-  }
-
-
   async syncDevice(device: DeviceBase): Promise<boolean> {
     if (!this.isDeviceBonded(device)) {
       return false;
@@ -391,7 +367,9 @@ export class DeviceInfoProvider {
       this.ble.connect(device.id).subscribe(
         async (peripheral) => { // connect callback
           console.log('connect ble callback', peripheral);
-          res(await this.connect_callback(device, isFirst));
+          // res(await this.connect_callback(device, isFirst));
+          const rest = await this.generalConnectPostCallback(device);
+          res(rest);
         },
         async (peripheral) => { // disconnect callback
           console.log('disconnect callback from connect_promise');
@@ -401,6 +379,40 @@ export class DeviceInfoProvider {
       );
     });
   }
+
+
+  async generalConnectPostCallback(device:DeviceBase){
+    const result = await this.connect_callback(device);
+    if(result && device.config.autoSyncAfterConnection) {
+      this.syncDevice(device);
+    }
+    return result;
+  }
+
+  async autoConnect(device: DeviceBase) {
+    const check: boolean = this.isDeviceBonded(device);
+    if (!check) {
+      return;
+    }
+    if (!device.isInStaticStatus(EnumDeviceStaticStatus.NotConnected)) {
+      return;
+    }
+
+
+    device.setStaticStatus(EnumDeviceStaticStatus.Autoconnecting);
+
+    this.ble.autoConnect(device.id,
+      () => {
+        // this.connect_callback(device);
+        this.generalConnectPostCallback(device);
+      },
+      () => {
+        device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
+        console.log('disconnect callback after auto-connect');
+      }
+    );
+  }
+
 
 
 

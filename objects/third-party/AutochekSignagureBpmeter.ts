@@ -114,7 +114,8 @@ export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
                 const hour = ub[11];
                 const minute = ub[12];
                 const second = ub[13]
-                data.date = new Date(year, month, date, hour, minute, second);
+                // data.date = new Date(year, month, date, hour, minute, second);
+                data.date = new Date();
 
                 this.service.putBloodpressureMeasurement(data);
 
