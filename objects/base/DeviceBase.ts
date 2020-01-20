@@ -40,8 +40,8 @@ export abstract class DeviceBase {
 
     config: DeviceBaseConfig = {
         noConnectionOnBond: false,
-        setAutoConnection: false,
-        autoSyncAfterConnection: false,
+        setAutoConnection: true,
+        autoSyncAfterConnection: true,
     };
 
 
