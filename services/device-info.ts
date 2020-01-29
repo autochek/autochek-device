@@ -426,6 +426,7 @@ export class DeviceInfoProvider {
     try {
       console.log('force disconnect from disconnectDevice');
       await this.ble.disconnect(device.id);
+      device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
       return true;
     } catch (error) {
       console.error(error);
