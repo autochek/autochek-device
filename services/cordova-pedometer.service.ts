@@ -6,6 +6,23 @@ import { PedometerTimeSegment, PedometerDaySummary, PedometerSleepSegment,
    PedometerHeartrateSegment, PedometerSleepSummary } from 'autochek-base/objects/device-data-object';
 
 
+export interface PedometerUser {
+  gender:'male'|'female',
+  age:number,
+  birth:Date,
+  height:number,
+  weight:number,
+}
+
+export const DefaultPedometerUser: PedometerUser = {
+  gender:'male',
+  age:40,
+  birth:new Date(1980,0,1),
+  height:175,
+  weight:65
+}
+
+  
 @Injectable()
 export class CordovaPedometerService {
 
@@ -15,6 +32,17 @@ export class CordovaPedometerService {
 
   }
 
+
+  user:PedometerUser = null;
+  setUser(scaleUser:PedometerUser){
+    this.user = scaleUser;
+  }
+  getUser(): PedometerUser{
+    if(this.user) {
+      return this.user;
+    }
+    return DefaultPedometerUser;
+  }
 
   onLogToServer: Subject<string> = new Subject<string>();
   onPedometerTimeSegment: Subject<PedometerTimeSegment[]> = new Subject<PedometerTimeSegment[]>();

@@ -332,7 +332,8 @@ export class DeviceInfoProvider {
   }
 
 
-  private async connect_callback(device: DeviceBase, isFirst?: boolean): Promise<boolean> {
+  private async connect_callback(device: DeviceBase, isFirst: boolean): Promise<boolean> {
+    console.log('connect_callback', device, isFirst);
     if (!device.isInDynamicStatus(EnumDeviceDynamicStatus.Idle)) {
 
       console.log(`You cannot connect device. Device dynamic status is not Idle`);
@@ -368,7 +369,7 @@ export class DeviceInfoProvider {
         async (peripheral) => { // connect callback
           console.log('connect ble callback', peripheral);
           // res(await this.connect_callback(device, isFirst));
-          const rest = await this.generalConnectPostCallback(device);
+          const rest = await this.generalConnectPostCallback(device, isFirst);
           res(rest);
         },
         async (peripheral) => { // disconnect callback
@@ -381,8 +382,8 @@ export class DeviceInfoProvider {
   }
 
 
-  async generalConnectPostCallback(device:DeviceBase){
-    const result = await this.connect_callback(device);
+  async generalConnectPostCallback(device:DeviceBase, isFirst:boolean){
+    const result = await this.connect_callback(device, isFirst);
     if(result && device.config.autoSyncAfterConnection) {
       this.syncDevice(device);
     }
@@ -404,7 +405,7 @@ export class DeviceInfoProvider {
     this.ble.autoConnect(device.id,
       () => {
         // this.connect_callback(device);
-        this.generalConnectPostCallback(device);
+        this.generalConnectPostCallback(device, false);
       },
       () => {
         device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);

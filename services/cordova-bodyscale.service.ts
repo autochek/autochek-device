@@ -10,6 +10,7 @@ export interface ScaleUser {
   age:number,
   birth:Date,
   height:number,
+  
 }
 
 export const DefaultScaleUser: ScaleUser = {
@@ -17,6 +18,7 @@ export const DefaultScaleUser: ScaleUser = {
   age:40,
   birth:new Date(1980,0,1),
   height:175,
+  
 }
 
 @Injectable()

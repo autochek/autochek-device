@@ -189,20 +189,20 @@ export class Q8Device extends PedometerDeviceBase {
                 }
 
                 if (!l1Collector.isFull()) {
-                    this.leveledLog(0, 'L1 packet is not complete. wait for the next packet');
+                    console.log(0, 'L1 packet is not complete. wait for the next packet');
                     return;
                 }
 
                 if (l1Collector.isAckPacket()) {
-                    this.leveledLog(0, 'Received ack : ' + x2s(l1Collector.ack));
+                    console.log(0, 'Received ack : ' + x2s(l1Collector.ack));
 
                     this.com_is_acked = l1Collector.ack;
                     this.com_acker.next();
                 } else {
-                    this.leveledLog(0, 'Received full L1 packet' + l1Collector);
+                    console.log(0, 'Received full L1 packet' + l1Collector);
                     const l2received = l1Collector.genL2Packet();
 
-                    this.leveledLog(1, 'Recieved l2 packet ' + l2received);
+                    console.log(1, 'Recieved l2 packet ' + l2received);
                     this.writeAck(l1Collector.ack); // return ack
                     this.handle_notified_l2(l2received);
 
@@ -223,8 +223,8 @@ export class Q8Device extends PedometerDeviceBase {
                     return;
                 }
                 const l1pack = this.com_l1_queue.shift();
-                this.leveledLog(0, 'Actual L1 packet sending ' + l1pack);
-                this.leveledLog(1, 'Writing L2 ' + l1pack.genL2Packet());
+                console.log(0, 'Actual L1 packet sending ' + l1pack);
+                console.log(1, 'Writing L2 ' + l1pack.genL2Packet());
 
                 l1pack.genPacketSegments().forEach((ps: PacketSegment) => {
                     this.writeToDevice(ps);
@@ -236,11 +236,13 @@ export class Q8Device extends PedometerDeviceBase {
 
 
     private handle_notified_l2(packet: L2Packet) {
-        this.leveledLog(1, 'Recieved packet value : ', packet.value);
+        // console.log(1, 'Recieved packet value : ', packet.value);
+
         if (packet.cmdid === 3) {
             if (packet.keyid === 2 || packet.keyid === 4) {
                 // Connection success. First or repeat. whatever
-                this.writeL2(packUser(1, 29, 170, 62), 2, 0x10);
+                const user = this.service.getUser();
+                this.writeL2(packUser(user.gender==='male'?1:2, user.age, user.height, user.weight), 2, 0x10);
                 this.writeL2('01', 2, 0x22);
                 this.writeL2('', 2, 0x1e);
             } else {
@@ -334,13 +336,13 @@ export class Q8Device extends PedometerDeviceBase {
                         break;
 
                     case 5: // Heartrate
-                        // this.leveledLog(2, this.historyBpData);
+                        // console.log(2, this.historyBpData);
                         this.pedometerHeartrateSegments = this.parseHeartrate(this.historyBpData);
                         this.historyBpData = '';
                         break;
 
                     case 6: // Excs
-                        this.leveledLog(2, this.historyExcsData);
+                        console.log(2, this.historyExcsData);
                         this.historyExcsData = '';
 
                         break;
@@ -362,7 +364,7 @@ export class Q8Device extends PedometerDeviceBase {
                 const step: number = parseInt(packet.value.substring(0, 8), 16);
                 const dist: number = parseInt(packet.value.substring(8, 16), 16);
                 const cal: number = parseInt(packet.value.substring(16, 24), 16);
-                this.leveledLog(2, "Today's summary", date, step, dist, cal);
+                console.log(2, "Today's summary", date, step, dist, cal);
                 this.pushProgressString('오늘의 요약정보를 받았습니다');
                 const daySummary = new PedometerDaySummary(date, step, cal, dist);
                 this.pedometerDaySummaries.push(daySummary);
@@ -403,7 +405,7 @@ export class Q8Device extends PedometerDeviceBase {
             const d_date: Date = parseDateBlock(value.substring(4, 8));
             const i_minute: number = parseInt(value.substring(8, 12), 16);
 
-            this.leveledLog(1, 'act segment chunk', d_date, i_minute, length);
+            console.log(1, 'act segment chunk', d_date, i_minute, length);
             const e_idx = 16 + 4 * length;
 
             let logStartDate: Date = null;
@@ -423,11 +425,11 @@ export class Q8Device extends PedometerDeviceBase {
                     step = 0;
                 }
                 let minute = i_minute + i * 5;
-                this.leveledLog(1, 'Parsing datetime log[0]', i_minute, i, minute);
+                console.log(1, 'Parsing datetime log[0]', i_minute, i, minute);
                 const hour = Math.floor(minute / 60);
                 minute = minute % 60;
 
-                this.leveledLog(1, 'Parsing datetime log[1]', hour, minute);
+                console.log(1, 'Parsing datetime log[1]', hour, minute);
                 const d = new Date(d_date);
                 d.setHours(hour);
                 d.setMinutes(minute);
@@ -437,7 +439,7 @@ export class Q8Device extends PedometerDeviceBase {
                     logStartDate = d;
                 }
                 logCount++;
-                this.leveledLog(1, 'Parsing datetime log[2]', d);
+                console.log(1, 'Parsing datetime log[2]', d);
                 segments.push(new PedometerTimeSegment(d, 5, step, step * 47.423, 0.76 * step));
             }
             // this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
@@ -465,7 +467,7 @@ export class Q8Device extends PedometerDeviceBase {
 
             const nextdate = moment(date).add(1, 'day').toDate();
             const sleepSummary: PedometerSleepSummary = new PedometerSleepSummary(nextdate, deepsleep, lightsleep);
-            this.leveledLog(2, `Sleep report - deep:${deepsleep}, light:${lightsleep}`);
+            console.log(2, `Sleep report - deep:${deepsleep}, light:${lightsleep}`);
             sleepSummaries.push(sleepSummary);
             value = value.substring(12);
         }
@@ -542,13 +544,13 @@ export class Q8Device extends PedometerDeviceBase {
 
     private writeToDevice(packet: PacketSegment) {
         super.write(UUID_SERVICE, UUID_CHAR_WRITE, packet.buffer).then(
-            () => { this.leveledLog(0, 'write packet success ' + packet); },
-            (err) => { this.leveledLog(0, 'write packet err' + packet + ' err-code: ' + err); }
+            () => { console.log(0, 'write packet success ' + packet); },
+            (err) => { console.log(0, 'write packet err' + packet + ' err-code: ' + err); }
         );
     }
 
     private writeAck(num: number) {
-        this.leveledLog(1, 'Sending Ack ' + x2s(num));
+        console.log(1, 'Sending Ack ' + x2s(num));
         const l1 = new L1Packet(num).genSinglePacketSegment();
         this.writeToDevice(l1);
 
@@ -685,7 +687,7 @@ class PacketSegment extends PacketBase {
         }
 
         if (parent) {
-            // this.leveledLog('PacketSegment '+super.toString()+' was made from '+parent.toString());
+            // console.log('PacketSegment '+super.toString()+' was made from '+parent.toString());
             this.parent = parent.toString();
         } else {
             this.parent = '';
