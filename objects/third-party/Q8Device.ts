@@ -242,7 +242,9 @@ export class Q8Device extends PedometerDeviceBase {
             if (packet.keyid === 2 || packet.keyid === 4) {
                 // Connection success. First or repeat. whatever
                 const user = this.service.getUser();
-                this.writeL2(packUser(user.gender==='male'?1:2, user.age, user.height, user.weight), 2, 0x10);
+                this.writeL2(packUser(user.gender==='male'?1:0, user.age, user.height, user.weight), 2, 0x10);
+                // male : 1
+                // female : 0
                 this.writeL2('01', 2, 0x22);
                 this.writeL2('', 2, 0x1e);
             } else {
@@ -399,6 +401,8 @@ export class Q8Device extends PedometerDeviceBase {
 
     private parseActSegment(value: string): PedometerTimeSegment[] {
         const segments: PedometerTimeSegment[] = [];
+        const height = this.service.getUser().height;
+        const weight = this.service.getUser().weight;
 
         while (value.length > 0) {
             const length: number = parseInt(value.substring(0, 4), 16);
@@ -440,7 +444,10 @@ export class Q8Device extends PedometerDeviceBase {
                 }
                 logCount++;
                 console.log(1, 'Parsing datetime log[2]', d);
-                segments.push(new PedometerTimeSegment(d, 5, step, step * 47.423, 0.76 * step));
+                
+                const distance = (height/100.0*0.41*step);
+                const calories = (height/100.0*weight*0.32096*step)
+                segments.push(new PedometerTimeSegment(d, 5, step, calories, distance));
             }
             // this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
             this.syncLogString += `PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}||\r\n`;
