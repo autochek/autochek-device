@@ -472,6 +472,10 @@ export class Q8Device extends PedometerDeviceBase {
             const deepsleep = parseInt(value.substring(4, 8), 16);
             const lightsleep = parseInt(value.substring(8, 12), 16);
 
+            if(!deepsleep && !lightsleep){
+                continue;
+            }
+
             const nextdate = moment(date).add(1, 'day').toDate();
             const sleepSummary: PedometerSleepSummary = new PedometerSleepSummary(nextdate, deepsleep, lightsleep);
             console.log(2, `Sleep report - deep:${deepsleep}, light:${lightsleep}`);
