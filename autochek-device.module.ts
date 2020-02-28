@@ -9,6 +9,9 @@ import { CordovaPedometerService } from './services/cordova-pedometer.service';
 import { CordovaBpmeterService } from './services/cordova-bpmeter.service';
 import { CordovaBodyscaleService } from './services/cordova-bodyscale.service';
 
+import { DeviceBodyscaleDual } from './services/device-bodyscale-dual';
+import { Qnscale } from 'ionic-native-qnscale/ngx';
+
 @NgModule({
   imports: [],
   declarations: [],
@@ -27,6 +30,8 @@ import { CordovaBodyscaleService } from './services/cordova-bodyscale.service';
     CordovaBpmeterService,
     CordovaBodyscaleService,
 
+    Qnscale,
+    DeviceBodyscaleDual,
 
   ],
 })
@@ -39,5 +44,8 @@ ionic cordova plugin add cordova-plugin-ble-central
 npm install --save @ionic-native/native-storage
 npm install --save @ionic-native/ble
 
+==yolanda qnscale support==
+ionic cordova plugin add https://github.com/navelist89/cordova-plugin-qnscale.git
+npm install --save https://github.com/navelist89/ionic-native-qnscale.git
 */
 
