@@ -45,7 +45,8 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
     async first_connect_callback(): Promise<boolean> {
         await this.general_connect_precallback();
-        return this.syncTime(new Date());
+        await this.syncTime(new Date());
+        return true;
     }
 
     async repeated_connect_callback(): Promise<boolean> {

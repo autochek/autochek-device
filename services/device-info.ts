@@ -134,7 +134,11 @@ export class DeviceInfoProvider {
       bodyscale: this.cordovaBodyscaleService,
     };
 
-    this.initConnectedDevices();
+    this.initConnectedDevices().then(
+      ()=>{
+        this.autoConnectAll();
+      }
+    );
 
   }
 
@@ -242,7 +246,18 @@ export class DeviceInfoProvider {
       console.log('recovered connectedDevices', this.connectedDevices);
     }
 
+    return;
 
+  }
+
+  private autoConnectAll(){
+    for (const devicetype of devicetypeList) {
+      for (const device of this.connectedDevices[devicetype]) {
+        if((device as DeviceBase).config.setAutoConnection){
+          this.autoConnect(device);
+        }
+      }
+    }
   }
 
   // connectedDevice->storageData
