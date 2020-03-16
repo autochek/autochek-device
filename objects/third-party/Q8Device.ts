@@ -189,20 +189,20 @@ export class Q8Device extends PedometerDeviceBase {
                 }
 
                 if (!l1Collector.isFull()) {
-                    console.log(0, 'L1 packet is not complete. wait for the next packet');
+                    // console.log(0, 'L1 packet is not complete. wait for the next packet');
                     return;
                 }
 
                 if (l1Collector.isAckPacket()) {
-                    console.log(0, 'Received ack : ' + x2s(l1Collector.ack));
+                    // console.log(0, 'Received ack : ' + x2s(l1Collector.ack));
 
                     this.com_is_acked = l1Collector.ack;
                     this.com_acker.next();
                 } else {
-                    console.log(0, 'Received full L1 packet' + l1Collector);
+                    // console.log(0, 'Received full L1 packet' + l1Collector);
                     const l2received = l1Collector.genL2Packet();
 
-                    console.log(1, 'Recieved l2 packet ' + l2received);
+                    // console.log(1, 'Recieved l2 packet ' + l2received);
                     this.writeAck(l1Collector.ack); // return ack
                     this.handle_notified_l2(l2received);
 
@@ -223,8 +223,8 @@ export class Q8Device extends PedometerDeviceBase {
                     return;
                 }
                 const l1pack = this.com_l1_queue.shift();
-                console.log(0, 'Actual L1 packet sending ' + l1pack);
-                console.log(1, 'Writing L2 ' + l1pack.genL2Packet());
+                // console.log(0, 'Actual L1 packet sending ' + l1pack);
+                // console.log(1, 'Writing L2 ' + l1pack.genL2Packet());
 
                 l1pack.genPacketSegments().forEach((ps: PacketSegment) => {
                     this.writeToDevice(ps);
@@ -242,7 +242,7 @@ export class Q8Device extends PedometerDeviceBase {
             if (packet.keyid === 2 || packet.keyid === 4) {
                 // Connection success. First or repeat. whatever
                 const user = this.service.getUser();
-                this.writeL2(packUser(user.gender==='male'?1:0, user.age, user.height, user.weight), 2, 0x10);
+                this.writeL2(packUser(user.gender === 'male' ? 1 : 0, user.age, user.height, user.weight), 2, 0x10);
                 // male : 1
                 // female : 0
                 this.writeL2('01', 2, 0x22);
@@ -403,8 +403,9 @@ export class Q8Device extends PedometerDeviceBase {
         const segments: PedometerTimeSegment[] = [];
         const height = this.service.getUser().height;
         const weight = this.service.getUser().weight;
-
+        console.log("parseActSegment");
         while (value.length > 0) {
+            console.log("Iter 'value' string : length - ", value.length);
             const length: number = parseInt(value.substring(0, 4), 16);
             const d_date: Date = parseDateBlock(value.substring(4, 8));
             const i_minute: number = parseInt(value.substring(8, 12), 16);
@@ -429,11 +430,11 @@ export class Q8Device extends PedometerDeviceBase {
                     step = 0;
                 }
                 let minute = i_minute + i * 5;
-                console.log(1, 'Parsing datetime log[0]', i_minute, i, minute);
+                // console.log(1, 'Parsing datetime log[0]', i_minute, i, minute);
                 const hour = Math.floor(minute / 60);
                 minute = minute % 60;
 
-                console.log(1, 'Parsing datetime log[1]', hour, minute);
+                // console.log(1, 'Parsing datetime log[1]', hour, minute);
                 const d = new Date(d_date);
                 d.setHours(hour);
                 d.setMinutes(minute);
@@ -443,10 +444,10 @@ export class Q8Device extends PedometerDeviceBase {
                     logStartDate = d;
                 }
                 logCount++;
-                console.log(1, 'Parsing datetime log[2]', d);
-                
-                const distance = (height/100.0*0.41*step);
-                const calories = (height/100.0*weight*0.32096*step)
+                // console.log(1, 'Parsing datetime log[2]', d);
+
+                const distance = (height / 100.0 * 0.41 * step);
+                const calories = (height / 100.0 * weight * 0.32096 * step)
                 segments.push(new PedometerTimeSegment(d, 5, step, calories, distance));
             }
             // this.service.putLogToServer(`PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}`);
@@ -472,7 +473,8 @@ export class Q8Device extends PedometerDeviceBase {
             const deepsleep = parseInt(value.substring(4, 8), 16);
             const lightsleep = parseInt(value.substring(8, 12), 16);
 
-            if(!deepsleep && !lightsleep){
+            if (!deepsleep && !lightsleep) {
+                value = value.substring(12);
                 continue;
             }
 
@@ -555,13 +557,17 @@ export class Q8Device extends PedometerDeviceBase {
 
     private writeToDevice(packet: PacketSegment) {
         super.write(UUID_SERVICE, UUID_CHAR_WRITE, packet.buffer).then(
-            () => { console.log(0, 'write packet success ' + packet); },
-            (err) => { console.log(0, 'write packet err' + packet + ' err-code: ' + err); }
+            () => {
+                // console.log(0, 'write packet success ' + packet);
+            },
+            (err) => {
+                //  console.log(0, 'write packet err' + packet + ' err-code: ' + err);
+            }
         );
     }
 
     private writeAck(num: number) {
-        console.log(1, 'Sending Ack ' + x2s(num));
+        // console.log(1, 'Sending Ack ' + x2s(num));
         const l1 = new L1Packet(num).genSinglePacketSegment();
         this.writeToDevice(l1);
 

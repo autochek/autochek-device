@@ -406,13 +406,21 @@ export class DeviceInfoProvider {
   }
 
   async autoConnect(device: DeviceBase) {
+    console.log("Auto connecting device", device);
     const check: boolean = this.isDeviceBonded(device);
     if (!check) {
+      console.log("Device is not bonded. ignore autoconnect");
       return;
     }
     if (!device.isInStaticStatus(EnumDeviceStaticStatus.NotConnected)) {
+      console.log("Device is not NotConnected. Do not autoconnect");
       return;
     }
+    if(!device.isInDynamicStatus(EnumDeviceDynamicStatus.Idle)) {
+      console.log("Device is not Idle. Do not autoconnect");
+    }
+
+    console.log("Starts Autoconnect!");
 
 
     device.setStaticStatus(EnumDeviceStaticStatus.Autoconnecting);
