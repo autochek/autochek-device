@@ -380,6 +380,7 @@ export class Q8Device extends PedometerDeviceBase {
 
         this.service.putSyncDataPostCallback()
 
+        this.pushProgressString('동기화가 완료 되었습니다.' + moment().format('hh시mm분'))
 
         this.sync_promise_response(true)
 
