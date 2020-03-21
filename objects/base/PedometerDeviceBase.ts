@@ -1,15 +1,13 @@
-import { DeviceBase } from './DeviceBase';
+import { DeviceBase } from './DeviceBase'
 
-import { BLE } from '@ionic-native/ble/ngx';
+import { BLE } from '@ionic-native/ble/ngx'
 
 
 export abstract class PedometerDeviceBase extends DeviceBase {
 
-  type = 'pedometer';
+  type = 'pedometer'
+
   constructor(ble: BLE, id: string, name: string, extra?: object) {
-    super(ble, id, name, extra);
+    super(ble, id, name, extra)
   }
-
-
-
 }
