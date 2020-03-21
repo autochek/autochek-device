@@ -424,14 +424,17 @@ export class DeviceInfoProvider {
 
 
     device.setStaticStatus(EnumDeviceStaticStatus.Autoconnecting);
+    
 
     this.ble.autoConnect(device.id,
       () => {
         // this.connect_callback(device);
+        //device.setDynamicStatus(EnumDeviceDynamicStatus.Connecting);
         this.generalConnectPostCallback(device, false);
       },
       () => {
         device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
+        device.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
         console.log('disconnect callback after auto-connect');
       }
     );
