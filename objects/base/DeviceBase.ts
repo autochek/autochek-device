@@ -60,11 +60,13 @@ export abstract class DeviceBase {
   }
 
   public setStaticStatus(nStatus: EnumDeviceStaticStatus) {
+    console.log(this.type, "setStaticStatus", this.staticStatus, "->", nStatus)
     this.staticStatus = nStatus
     this.staticStatusSubject.next(nStatus)
   }
 
   public setDynamicStatus(nStatus: EnumDeviceDynamicStatus) {
+    console.log(this.type, "setDynamicStatus", this.dynamicStatus, "->", nStatus)
     this.dynamicStatus = nStatus
     this.dynamicStatusSubject.next(nStatus)
   }
