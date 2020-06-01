@@ -26,6 +26,7 @@ import { PedometerDeviceBase } from 'autochek-device/objects/base/PedometerDevic
 import { QnScaleDevice } from 'autochek-device/objects/third-party/QnScaleDevice';
 import { ChipseaScaleDevice } from 'autochek-device/objects/third-party/ChipseaScaleDevice';
 import { AutochekSignatureBpmeter } from 'autochek-device/objects/third-party/AutochekSignagureBpmeter';
+import { BUILD_PLATFORM } from 'src/environments/build-config';
 
 
 
@@ -200,7 +201,6 @@ export class DeviceInfoProvider {
   }
 
   stopScan() {
-
     this.scanObservable.complete();
     this.ble.stopScan();
   }
@@ -328,6 +328,9 @@ export class DeviceInfoProvider {
     const check: DeviceBase[] = this.connectedDevices[device.type].filter((db: DeviceBase) => db.id === device.id);
     if (check.length <= 0) {
       return false; // the device is not bonded;
+    }
+    if(BUILD_PLATFORM==="ios") {
+      const identifiers = await this.ble.peripheralsWithIdentifiers([device.id]);
     }
     return await this.connect_promise(device);
   }
