@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { BLE } from '@ionic-native/ble/ngx';
-import { GlucosemeterMeasurement } from 'autochek-base/objects/device-data-object';
-import { Subject } from 'rxjs';
+import { Injectable } from '@angular/core'
+import { BLE } from '@ionic-native/ble/ngx'
+import { GlucosemeterMeasurement } from 'autochek-base/objects/device-data-object'
+import { Subject } from 'rxjs'
 
 
 @Injectable()
@@ -13,13 +13,13 @@ export class CordovaGlucosemeterService {
 
   }
 
-  public onGlucosemeterMeasurements: Subject<GlucosemeterMeasurement[]> = new Subject<GlucosemeterMeasurement[]>();
+  public onGlucosemeterMeasurements: Subject<GlucosemeterMeasurement[]> = new Subject<GlucosemeterMeasurement[]>()
 
 
   public putGlucosemeterMeasurements(measurements: GlucosemeterMeasurement | GlucosemeterMeasurement[]) {
     if (!Array.isArray(measurements)) {
-      measurements = [measurements];
+      measurements = [measurements]
     }
-    this.onGlucosemeterMeasurements.next(measurements);
+    this.onGlucosemeterMeasurements.next(measurements)
   }
 }

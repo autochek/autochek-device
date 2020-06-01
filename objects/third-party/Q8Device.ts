@@ -167,7 +167,6 @@ export class Q8Device extends PedometerDeviceBase {
     this.connection_phase = 0
     // this.connection_result = new Promise<boolean>((res,rej)=>{});
 
-
     let l1Collector: L1Packet = null
 
 
@@ -198,8 +197,6 @@ export class Q8Device extends PedometerDeviceBase {
           // console.log(1, 'Recieved l2 packet ' + l2received);
           this.writeAck(l1Collector.ack) // return ack
           this.handle_notified_l2(l2received)
-
-
         }
         l1Collector = null
 

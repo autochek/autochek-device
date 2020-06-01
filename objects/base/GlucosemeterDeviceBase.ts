@@ -8,6 +8,5 @@ export abstract class GlucosemeterDeviceBase extends DeviceBase {
 
   constructor(ble: BLE, id: string, name: string, extra?: object) {
     super(ble, id, name, extra)
-
   }
 }
