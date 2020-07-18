@@ -1,25 +1,25 @@
-import { Injectable, NgZone } from '@angular/core'
-import { NativeStorage } from '@ionic-native/native-storage/ngx'
-import { BLE } from '@ionic-native/ble/ngx'
-import { Observable, Subject, ReplaySubject } from 'rxjs'
+import {Injectable, NgZone} from '@angular/core'
+import {NativeStorage} from '@ionic-native/native-storage/ngx'
+import {BLE} from '@ionic-native/ble/ngx'
+import {Observable, ReplaySubject, Subject} from 'rxjs'
 
 
-import { DeviceBase, EnumDeviceDynamicStatus, EnumDeviceStaticStatus } from '../objects/base/DeviceBase'
+import {DeviceBase, EnumDeviceDynamicStatus, EnumDeviceStaticStatus} from '../objects/base/DeviceBase'
 
-import { GlucosemeterDeviceBase } from '../objects/base/GlucosemeterDeviceBase'
+import {GlucosemeterDeviceBase} from '../objects/base/GlucosemeterDeviceBase'
 
-import { AutochekBGMDevice } from '../objects/third-party/AutochekBGMDevice';
+import {AutochekBGMDevice} from '../objects/third-party/AutochekBGMDevice';
 
-import { CordovaGlucosemeterService } from './cordova-glucosmeter.service';
-import { CordovaPedometerService } from './cordova-pedometer.service';
-import { CordovaBpmeterService } from './cordova-bpmeter.service';
-import { CordovaBodyscaleService } from './cordova-bodyscale.service';
-import { Q8Device } from 'autochek-device/objects/third-party/Q8Device';
-import { PedometerDeviceBase } from 'autochek-device/objects/base/PedometerDeviceBase';
-import { QnScaleDevice } from 'autochek-device/objects/third-party/QnScaleDevice';
-import { ChipseaScaleDevice } from 'autochek-device/objects/third-party/ChipseaScaleDevice';
-import { AutochekSignatureBpmeter } from 'autochek-device/objects/third-party/AutochekSignagureBpmeter';
-import { BUILD_PLATFORM } from 'src/environments/build-config';
+import {CordovaGlucosemeterService} from './cordova-glucosmeter.service';
+import {CordovaPedometerService} from './cordova-pedometer.service';
+import {CordovaBpmeterService} from './cordova-bpmeter.service';
+import {CordovaBodyscaleService} from './cordova-bodyscale.service';
+import {Q8Device} from 'autochek-device/objects/third-party/Q8Device';
+import {PedometerDeviceBase} from 'autochek-device/objects/base/PedometerDeviceBase';
+import {QnScaleDevice} from 'autochek-device/objects/third-party/QnScaleDevice';
+import {ChipseaScaleDevice} from 'autochek-device/objects/third-party/ChipseaScaleDevice';
+import {AutochekSignatureBpmeter} from 'autochek-device/objects/third-party/AutochekSignagureBpmeter';
+import {Device} from '@ionic-native/device'
 
 
 const deviceList = {
@@ -175,7 +175,7 @@ export class DeviceInfoProvider {
         }
 
       },
-      (error) => {
+      () => {
         this.scanObservable.complete()
 
       },
@@ -201,14 +201,14 @@ export class DeviceInfoProvider {
     console.log('removeDevice', device)
     this.connectedDevices[device.type] = this.connectedDevices[device.type].filter((db) => db.id !== device.id)
     this.connectedDevicesObservable.next(this.connectedDevices)
-    this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices))
+    this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, DeviceInfoProvider.serializer(this.connectedDevices))
   }
 
   private addDevice(device: DeviceBase) {
     console.log('addDevice', device)
     this.connectedDevices[device.type].push(device)
     this.connectedDevicesObservable.next(this.connectedDevices)
-    this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices))
+    this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, DeviceInfoProvider.serializer(this.connectedDevices))
   }
 
   private async initConnectedDevices() {
@@ -249,7 +249,7 @@ export class DeviceInfoProvider {
   }
 
   // connectedDevice->storageData
-  private serializer(cds: ConnectedDevice): StorageData {
+  private static serializer(cds: ConnectedDevice): StorageData {
     const nsds = Object.assign({}, defaultStorageData)
     for (const devicetype of devicetypeList) {
       for (const cd of cds[devicetype]) {
@@ -269,7 +269,7 @@ export class DeviceInfoProvider {
     console.log('ncds : ', ncds)
     for (const devicetype of devicetypeList) {
       // console.log(devicetype, storageData[devicetype]);
-      for (const d in storageData[devicetype]) {
+      for (const d of storageData[devicetype]) {
         const dis = storageData[devicetype][d]
         console.log('looking for devicetype:', devicetype, dis)
 
@@ -317,7 +317,7 @@ export class DeviceInfoProvider {
     if (check.length <= 0) {
       return false // the device is not bonded;
     }
-    if(BUILD_PLATFORM==="ios") {
+    if (Device.platform.toLowerCase() === "ios") {
       const identifiers = await this.ble.peripheralsWithIdentifiers([device.id]);
     }
     return await this.connect_promise(device);
@@ -420,7 +420,7 @@ export class DeviceInfoProvider {
     this.ble.autoConnect(device.id,
       () => {
         // this.connect_callback(device);
-        //device.setDynamicStatus(EnumDeviceDynamicStatus.Connecting);
+        // device.setDynamicStatus(EnumDeviceDynamicStatus.Connecting);
         this.generalConnectPostCallback(device, false)
       },
       () => {
@@ -461,15 +461,15 @@ export class DeviceInfoProvider {
   }
 
   public getDeviceFromId(deviceId: string): DeviceBase {
-    for (let dk in this.connectedDevices) {
-      const dls = this.connectedDevices[dk]
-      for (let d of dls) {
+    for (const dk of Object.keys(this.connectedDevices)) {
+      const dls = this.connectedDevices[dk];
+      for (const d of dls) {
         if (d.id === deviceId) {
-          return d
+          return d;
         }
       }
     }
-    return null
+    return null;
   }
 
 }
