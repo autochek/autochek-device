@@ -27,6 +27,10 @@ export class CordovaBodyscaleService {
   onBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
   onEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
 
+  /**
+   * 생성자
+   * @param ble BLE 객체
+   */
   constructor(
       public ble: BLE,
   ) {

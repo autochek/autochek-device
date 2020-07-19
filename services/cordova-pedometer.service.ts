@@ -27,16 +27,23 @@ export const DefaultPedometerUser: PedometerUser = {
 
 @Injectable()
 export class CordovaPedometerService {
+
   onLogToServer: Subject<string> = new Subject<string>()
+  onBeginPedometerMeasurements: Subject<void> = new Subject<void>();
   onPedometerTimeSegment: Subject<PedometerTimeSegment[]> = new Subject<PedometerTimeSegment[]>()
   onPedometerDaySummary: Subject<PedometerDaySummary[]> = new Subject<PedometerDaySummary[]>()
   onPedometerSleepSegment: Subject<PedometerSleepSegment[]> = new Subject<PedometerSleepSegment[]>()
   onPedometerHeartrateSegment: Subject<PedometerHeartrateSegment[]> = new Subject<PedometerHeartrateSegment[]>()
   onPedometerSleepSummary: Subject<PedometerSleepSummary[]> = new Subject<PedometerSleepSummary[]>()
   onSyncDataPostCallback: Subject<void> = new Subject<void>()
+  onEndPedometerMeasurements: Subject<void> = new Subject<void>();
 
+  /**
+   * 생성자
+   * @param ble BLE 객체
+   */
   constructor(
-    public ble: BLE,
+      public ble: BLE,
   ) {
 
   }
@@ -61,6 +68,19 @@ export class CordovaPedometerService {
     return data
   }
 
+  /**
+   * 측정 시작
+   */
+  beginPedometerMeasurements() {
+    this.onBeginPedometerMeasurements.next();
+  }
+
+  /**
+   * 측정 종료
+   */
+  endPedometerMeasurements() {
+    this.onEndPedometerMeasurements.next();
+  }
 
   public putLogToServer(log: string) {
     this.onLogToServer.next(log)
