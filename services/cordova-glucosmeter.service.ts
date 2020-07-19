@@ -3,7 +3,9 @@ import { BLE } from '@ionic-native/ble/ngx'
 import { GlucosemeterMeasurement } from 'autochek-base/objects/device-data-object'
 import { Subject } from 'rxjs'
 
-
+/**
+ * 혈당계 서비스 클래스
+ */
 @Injectable()
 export class CordovaGlucosemeterService {
 

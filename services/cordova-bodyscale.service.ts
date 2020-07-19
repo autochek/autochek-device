@@ -21,6 +21,9 @@ export const DefaultScaleUser: ScaleUser = {
 
 }
 
+/**
+ * 체중계 서비스 클래스
+ */
 @Injectable()
 export class CordovaBodyscaleService {
   onBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();

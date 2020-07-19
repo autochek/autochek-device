@@ -4,7 +4,9 @@ import { BLE } from '@ionic-native/ble/ngx'
 import { Subject } from 'rxjs'
 import { BloodpressureMeasurement } from 'autochek-base/objects/device-data-object'
 
-
+/**
+ * 혈압계 서비스 클래스
+ */
 @Injectable()
 export class CordovaBpmeterService {
 

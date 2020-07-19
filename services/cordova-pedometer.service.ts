@@ -24,7 +24,9 @@ export const DefaultPedometerUser: PedometerUser = {
   weight: 65
 }
 
-
+/**
+ * 스마트 밴드 서비스 클래스
+ */
 @Injectable()
 export class CordovaPedometerService {
 
