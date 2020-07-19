@@ -21,7 +21,7 @@ export interface DeviceBaseConfig {
 }
 
 export interface DeviceBase {
-  class_name: string;
+  className: string;
   type: string;
   id: string;
   name: string;
@@ -32,72 +32,72 @@ export interface DeviceBase {
 }
 
 export abstract class DeviceBase {
-  type: string = 'devicebase'
-  id: string
-  name: string
-  class_name: string = 'DeviceBase'
-  extra: object
+  type: string = 'devicebase';
+  id: string;
+  name: string;
+  className: string = 'DeviceBase';
+  extra: object;
 
   config: DeviceBaseConfig = {
     noConnectionOnBond: false,
     setAutoConnection: true,
     autoSyncAfterConnection: true,
-  }
+  };
 
 
-  progress: Subject<string>
+  progress: Subject<string>;
 
-  protected ble: BLE
+  protected ble: BLE;
 
 
-  private staticStatus: EnumDeviceStaticStatus = EnumDeviceStaticStatus.NotConnected
-  private dynamicStatus: EnumDeviceDynamicStatus = EnumDeviceDynamicStatus.Idle
-  public staticStatusSubject: ReplaySubject<EnumDeviceStaticStatus> = new ReplaySubject<EnumDeviceStaticStatus>(1)
-  public dynamicStatusSubject: ReplaySubject<EnumDeviceDynamicStatus> = new ReplaySubject<EnumDeviceDynamicStatus>(1)
+  private staticStatus: EnumDeviceStaticStatus = EnumDeviceStaticStatus.NotConnected;
+  private dynamicStatus: EnumDeviceDynamicStatus = EnumDeviceDynamicStatus.Idle;
+  public staticStatusSubject: ReplaySubject<EnumDeviceStaticStatus> = new ReplaySubject<EnumDeviceStaticStatus>(1);
+  public dynamicStatusSubject: ReplaySubject<EnumDeviceDynamicStatus> = new ReplaySubject<EnumDeviceDynamicStatus>(1);
 
   static scanCallback(devicename: string): boolean {
-    return false
+    return false;
   }
 
   public setStaticStatus(nStatus: EnumDeviceStaticStatus) {
-    console.log(this.type, "setStaticStatus", this.staticStatus, "->", nStatus)
-    this.staticStatus = nStatus
-    this.staticStatusSubject.next(nStatus)
+    console.log(this.type, "setStaticStatus", this.staticStatus, "->", nStatus);
+    this.staticStatus = nStatus;
+    this.staticStatusSubject.next(nStatus);
   }
 
   public setDynamicStatus(nStatus: EnumDeviceDynamicStatus) {
-    console.log(this.type, "setDynamicStatus", this.dynamicStatus, "->", nStatus)
-    this.dynamicStatus = nStatus
-    this.dynamicStatusSubject.next(nStatus)
+    console.log(this.type, "setDynamicStatus", this.dynamicStatus, "->", nStatus);
+    this.dynamicStatus = nStatus;
+    this.dynamicStatusSubject.next(nStatus);
   }
 
   public isInStaticStatus(cStatus: EnumDeviceStaticStatus) {
-    return this.staticStatus === cStatus
+    return this.staticStatus === cStatus;
   }
 
   public isInDynamicStatus(cStatus: EnumDeviceDynamicStatus) {
-    return this.dynamicStatus === cStatus
+    return this.dynamicStatus === cStatus;
   }
 
 
   constructor(ble: BLE, id: string, name: string, extra?: object) {
-    this.ble = ble
-    this.id = id
-    this.name = name
-    this.extra = extra
+    this.ble = ble;
+    this.id = id;
+    this.name = name;
+    this.extra = extra;
 
 
-    this.progress = new Subject<string>()
+    this.progress = new Subject<string>();
 
-    this.setStaticStatus(EnumDeviceStaticStatus.NotConnected)
-    this.setDynamicStatus(EnumDeviceDynamicStatus.Idle)
+    this.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
+    this.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
 
   }
 
 
   toJSON() {
     return {
-      class_name: this.class_name,
+      className: this.className,
       type: this.type,
 
       id: this.id,
@@ -109,28 +109,32 @@ export abstract class DeviceBase {
 
       jsonConcat: (o2) => {
         for (const key in o2) {
-          this[key] = o2[key]
+          this[key] = o2[key];
         }
-        return this
+        return this;
       }
     }
   }
 
   pushProgressString(msg: string) {
-    this.progress.next(msg)
+    this.progress.next(msg);
   }
 
 
   protected startNotification(serviceUUID: string, characteristicUUID: string): Observable<any> {
-    return this.ble.startNotification(this.id, serviceUUID, characteristicUUID)
+    return this.ble.startNotification(this.id, serviceUUID, characteristicUUID);
+  }
+
+  protected stopNotification(serviceUUID: string, characteristicUUID: string): Promise<any> {
+    return this.ble.stopNotification(this.id, serviceUUID, characteristicUUID);
   }
 
   protected write(serviceUUID: string, characteristicUUID: string, value: ArrayBuffer): Promise<any> {
-    return this.ble.write(this.id, serviceUUID, characteristicUUID, value)
+    return this.ble.write(this.id, serviceUUID, characteristicUUID, value);
   }
 
   protected read(serviceUUID: string, characteristicUUID: string): Promise<any> {
-    return this.ble.read(this.id, serviceUUID, characteristicUUID)
+    return this.ble.read(this.id, serviceUUID, characteristicUUID);
   }
 
   abstract async first_connect_callback(): Promise<boolean>;

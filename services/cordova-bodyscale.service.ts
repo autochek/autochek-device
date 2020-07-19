@@ -23,31 +23,51 @@ export const DefaultScaleUser: ScaleUser = {
 
 @Injectable()
 export class CordovaBodyscaleService {
-  onBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>()
+  onBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();
+  onBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
+  onEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
 
   constructor(
-    public ble: BLE,
+      public ble: BLE,
   ) {
 
   }
 
-  user: ScaleUser = null
+  user: ScaleUser = null;
 
   setUser(scaleUser: ScaleUser) {
-    this.user = scaleUser
+    this.user = scaleUser;
   }
 
   getUser(): ScaleUser {
     if (this.user) {
-      return this.user
+      return this.user;
     }
-    return DefaultScaleUser
+    return DefaultScaleUser;
   }
 
+  /**
+   * 측정 시작
+   */
+  beginBodyscaleMeasurement() {
+    this.onBeginBodyscaleMeasurment.next();
+  }
+
+  /**
+   * 측정 종료
+   */
+  endBodyscaleMeasurement() {
+    this.onEndBodyscaleMeasurment.next();
+  }
+
+  /**
+   * 측정 데이터 전달
+   * @param measurements 측정 데이터
+   */
   putBodyscaleMeasurement(measurements: BodyscaleMeasurement | BodyscaleMeasurement[]) {
     if (!Array.isArray(measurements)) {
-      measurements = [measurements]
+      measurements = [measurements];
     }
-    this.onBodyscaleMeasurment.next(measurements)
+    this.onBodyscaleMeasurment.next(measurements);
   }
 }

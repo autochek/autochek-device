@@ -12,6 +12,7 @@ const UUID_CHAR_WRITE = 'fff2'
 
 
 export class ChipseaScaleDevice extends BodyscaleDeviceBase {
+
   constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
     super(service.ble, id, name, extra);
     this.class_name = 'ChipseaScaleDevice';
@@ -42,16 +43,22 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
     // transition from 0 to 1 : Send fixed number
     // this.writeHex('ca 0a 10 00 5d1c5908 80 1f b4 00 3f');
 
+    // 알람 시작
     this.startNotification(UUID_SERVICE, UUID_CHAR_NOTIFY).subscribe(
         (buffer) => {
+
           const packet: BodyscaleMeasurement = parsePacket(buffer);
           const fixed: boolean = isFixed(buffer);
           // this.logger.log(0, bufferToHex(buffer), `fixed?:${fixed}`)
-          console.log(bufferToHex(buffer), `fixed?:${fixed}`);
+          // console.log(bufferToHex(buffer), `fixed?:${fixed}`);
+
           if (status === 0) {
 
+            // 동기화 시작
+            this.service.beginBodyscaleMeasurement();
+
             // this.bodyscaleDataProvider.refreshBodyscaleRealtime(packet);
-            console.log(packet);
+
             if (fixed) {
               status = 1;
 
@@ -70,14 +77,14 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
                 this.service.putBodyscaleMeasurement(bmi);
                 // this.bodyscaleDataProvider.addBodyscaleRecent(bmi);
-
-                console.log(bmi);
               }
               else {
                 this.service.putBodyscaleMeasurement(packet);
                 // this.bodyscaleDataProvider.addBodyscaleRecent(packet);
-                console.log(packet);
               }
+
+              // 동기화 종료
+              this.service.endBodyscaleMeasurement();
             }
           }
 

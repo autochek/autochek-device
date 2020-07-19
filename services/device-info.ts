@@ -474,7 +474,7 @@ export class DeviceInfoProvider {
               // 연결 성공
               async (peripheral) => {
 
-                console.log('connect ble callback', peripheral);
+                // console.log('connect ble callback', peripheral);
 
                 // 일반 연결 콜백 함수 호출
                 res(await this.generalConnectPostCallback(device, isFirst));
