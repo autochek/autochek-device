@@ -26,7 +26,7 @@ export class QnScaleDevice extends BodyscaleDeviceBase {
 
   constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
     super(service.ble, id, name, extra)
-    this.class_name = 'QnScaleDevice'
+    this.className = 'QnScaleDevice'
   }
 
 

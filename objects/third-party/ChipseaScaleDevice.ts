@@ -15,7 +15,7 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
   constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
     super(service.ble, id, name, extra);
-    this.class_name = 'ChipseaScaleDevice';
+    this.className = 'ChipseaScaleDevice';
   }
 
   static scanCallback(devicename: string): boolean {

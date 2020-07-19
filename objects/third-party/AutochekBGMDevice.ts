@@ -35,7 +35,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
   constructor(protected service: CordovaGlucosemeterService, id: string, name: string, extra?: object) {
     super(service.ble, id, name, extra)
-    this.class_name = 'AutochekBGMDevice'
+    this.className = 'AutochekBGMDevice'
 
     this.config.autoSyncAfterConnection = true
 

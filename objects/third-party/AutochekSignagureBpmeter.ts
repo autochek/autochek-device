@@ -11,7 +11,7 @@ const UUID_CHAR_READ = '2a49'
 export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
   constructor(protected service: CordovaBpmeterService, id: string, name: string, extra?: object) {
     super(service.ble, id, name, extra)
-    this.class_name = 'AutochekSignatureBpmeter'
+    this.className = 'AutochekSignatureBpmeter'
   }
 
   static scanCallback(devicename: string): boolean {

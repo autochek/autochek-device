@@ -67,7 +67,7 @@ const devicetypeList = [
 interface DeviceInStorage {
   id: string;
   name: string;
-  class_name: string;
+  className: string;
   extra: string;
 }
 
@@ -667,7 +667,7 @@ export class DeviceInfoProvider {
     for (const devicetype of devicetypeList) {
       for (const cd of cds[devicetype]) {
         nsds[devicetype].push({
-          id: cd.id, name: cd.name, class_name: cd.class_name,
+          id: cd.id, name: cd.name, className: cd.className,
           extra: cd.extra ? JSON.stringify(cd.extra) : ''
         } as DeviceInStorage);
       }
@@ -690,7 +690,7 @@ export class DeviceInfoProvider {
         for (const cs of constructors) {
           const tclass = new cs(this, '', '');
           // console.log(tclass);
-          if (tclass.class_name === dis.class_name) {
+          if (tclass.className === dis.className) {
             ncds[devicetype].push(new cs(this.cordovaServices[devicetype], dis.id, dis.name, dis.extra ? JSON.parse(dis.extra) : {}));
           }
         }
