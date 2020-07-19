@@ -662,45 +662,43 @@ export class DeviceInfoProvider {
   // connectedDevice->storageData
   private serializer(cds: ConnectedDevice): StorageData {
 
-    const nsds = Object.assign({}, defaultStorageData)
+    const nsds = Object.assign({}, defaultStorageData);
+
     for (const devicetype of devicetypeList) {
       for (const cd of cds[devicetype]) {
         nsds[devicetype].push({
           id: cd.id, name: cd.name, class_name: cd.class_name,
           extra: cd.extra ? JSON.stringify(cd.extra) : ''
-        } as DeviceInStorage)
+        } as DeviceInStorage);
       }
     }
-    return nsds
+    return nsds;
   }
 
   // storageData->connectedDevice
   private deserializer(storageData: StorageData): ConnectedDevice {
-    const ncds = Object.assign({}, defaultConnectedDevice)
-    console.log('storageData : ', storageData)
-    console.log('ncds : ', ncds)
+    const ncds = Object.assign({}, defaultConnectedDevice);
+
     for (const devicetype of devicetypeList) {
       // console.log(devicetype, storageData[devicetype]);
       for (const d of storageData[devicetype]) {
-        const dis = storageData[devicetype][d]
-        console.log('looking for devicetype:', devicetype, dis)
+        const dis = storageData[devicetype][d];
+        // console.log('looking for devicetype:', devicetype, dis);
 
-        const constructors = deviceList[devicetype]
+        const constructors = deviceList[devicetype];
 
         for (const cs of constructors) {
-          const tclass = new cs(this, '', '')
-          console.log(tclass)
+          const tclass = new cs(this, '', '');
+          // console.log(tclass);
           if (tclass.class_name === dis.class_name) {
-            ncds[devicetype].push(new cs(this.cordovaServices[devicetype], dis.id, dis.name, dis.extra ? JSON.parse(dis.extra) : {}))
+            ncds[devicetype].push(new cs(this.cordovaServices[devicetype], dis.id, dis.name, dis.extra ? JSON.parse(dis.extra) : {}));
           }
-
         }
-
       }
       // const dis: DeviceInStorage = sd[devicetype];
 
     }
-    return ncds
+    return ncds;
   }
 
 }
