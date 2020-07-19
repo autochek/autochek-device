@@ -8,21 +8,21 @@ import { BodyscaleMeasurement } from 'autochek-base/objects/device-data-object';
 
 @Injectable()
 export class DeviceBodyscaleDual {
-  
+
 
   constructor(
-    private cordovaBodyscaleService:CordovaBodyscaleService,
-    private qnscale:Qnscale
+      private cordovaBodyscaleService: CordovaBodyscaleService,
+      private qnscale: Qnscale
   ) {
 
   }
 
-  async measureStart(height:number, gender:'male'|'female', year:number, month:number, date:number):Promise<void>{
+  async measureStart(height: number, gender: 'male'|'female', year: number, month: number, date: number): Promise<void>{
     console.log("Dual measure start");
     try{
-      let res:any = await this.qnscale.connectQnscale(height, gender, year, month, date);
+      let res: any = await this.qnscale.connectQnscale(height, gender, year, month, date);
       console.log("Dual plugin call done");
-      if(typeof(res)==='string') {
+      if (typeof(res) === 'string') {
         res = JSON.parse(res);
       }
       const measr = res;
@@ -39,8 +39,8 @@ export class DeviceBodyscaleDual {
 
       await this.cordovaBodyscaleService.putBodyscaleMeasurement(bmi);
       return;
-      
-    }catch(error){
+
+    }catch (error){
       console.error(error);
     }
     return;
@@ -59,14 +59,14 @@ export class DeviceBodyscaleDual {
 //   }
 
 
-  
+
 //   const modal = await this.modalController.create({
 //     component: YolandaPage,
 //   });
-  
+
 //   await modal.present();
 
-  
+
 //   try{
 //     console.log("yolanda starts")
 //     const res = await this.qnscale.connectQnscale(userInfo.height, userInfo.gender, birth.getFullYear(), birth.getMonth(), birth.getDate());
@@ -92,7 +92,7 @@ export class DeviceBodyscaleDual {
 //   } finally{
 //     modal.dismiss();
 //   }
-  
+
 
 
 //   // console.log(res);
