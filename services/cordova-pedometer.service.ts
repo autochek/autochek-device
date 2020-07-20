@@ -1,27 +1,27 @@
-import { Injectable } from '@angular/core'
-import { BLE } from '@ionic-native/ble/ngx'
+import {Injectable} from '@angular/core';
+import {BLE} from '@ionic-native/ble/ngx';
 
-import { Subject } from 'rxjs'
+import {Subject} from 'rxjs';
 import {
-  PedometerTimeSegment, PedometerDaySummary, PedometerSleepSegment,
-  PedometerHeartrateSegment, PedometerSleepSummary
-} from 'autochek-base/objects/device-data-object'
+	PedometerTimeSegment, PedometerDaySummary, PedometerSleepSegment,
+	PedometerHeartrateSegment, PedometerSleepSummary
+} from 'autochek-base/objects/device-data-object';
 
 
 export interface PedometerUser {
-  gender: 'male' | 'female',
-  age: number,
-  birth: Date,
-  height: number,
-  weight: number,
+	gender: 'male' | 'female',
+	age: number,
+	birth: Date,
+	height: number,
+	weight: number,
 }
 
 export const DefaultPedometerUser: PedometerUser = {
-  gender: 'male',
-  age: 40,
-  birth: new Date(1980, 0, 1),
-  height: 175,
-  weight: 65
+	gender: 'male',
+	age: 40,
+	birth: new Date(1980, 0, 1),
+	height: 175,
+	weight: 65
 }
 
 /**
@@ -30,85 +30,85 @@ export const DefaultPedometerUser: PedometerUser = {
 @Injectable()
 export class CordovaPedometerService {
 
-  onLogToServer: Subject<string> = new Subject<string>()
-  onBeginPedometerMeasurements: Subject<void> = new Subject<void>();
-  onPedometerTimeSegment: Subject<PedometerTimeSegment[]> = new Subject<PedometerTimeSegment[]>()
-  onPedometerDaySummary: Subject<PedometerDaySummary[]> = new Subject<PedometerDaySummary[]>()
-  onPedometerSleepSegment: Subject<PedometerSleepSegment[]> = new Subject<PedometerSleepSegment[]>()
-  onPedometerHeartrateSegment: Subject<PedometerHeartrateSegment[]> = new Subject<PedometerHeartrateSegment[]>()
-  onPedometerSleepSummary: Subject<PedometerSleepSummary[]> = new Subject<PedometerSleepSummary[]>()
-  onSyncDataPostCallback: Subject<void> = new Subject<void>()
-  onEndPedometerMeasurements: Subject<void> = new Subject<void>();
+	onLogToServer: Subject<string> = new Subject<string>();
+	onBeginPedometerMeasurements: Subject<void> = new Subject<void>();
+	onPedometerTimeSegment: Subject<PedometerTimeSegment[]> = new Subject<PedometerTimeSegment[]>();
+	onPedometerDaySummary: Subject<PedometerDaySummary[]> = new Subject<PedometerDaySummary[]>();
+	onPedometerSleepSegment: Subject<PedometerSleepSegment[]> = new Subject<PedometerSleepSegment[]>();
+	onPedometerHeartrateSegment: Subject<PedometerHeartrateSegment[]> = new Subject<PedometerHeartrateSegment[]>();
+	onPedometerSleepSummary: Subject<PedometerSleepSummary[]> = new Subject<PedometerSleepSummary[]>();
+	onSyncDataPostCallback: Subject<void> = new Subject<void>();
+	onEndPedometerMeasurements: Subject<void> = new Subject<void>();
 
-  /**
-   * 생성자
-   * @param ble BLE 객체
-   */
-  constructor(
-      public ble: BLE,
-  ) {
+	/**
+	 * 생성자
+	 * @param ble BLE 객체
+	 */
+	constructor(
+		public ble: BLE,
+	) {
 
-  }
+	}
 
-  user: PedometerUser = null
+	user: PedometerUser = null;
 
-  setUser(scaleUser: PedometerUser) {
-    this.user = scaleUser
-  }
+	setUser(scaleUser: PedometerUser) {
+		this.user = scaleUser;
+	}
 
-  getUser(): PedometerUser {
-    if (this.user) {
-      return this.user
-    }
-    return DefaultPedometerUser
-  }
+	getUser(): PedometerUser {
+		if (this.user) {
+			return this.user;
+		}
+		return DefaultPedometerUser;
+	}
 
-  private arraytize(data: any | any[]): any[] {
-    if (!Array.isArray(data)) {
-      data = [data]
-    }
-    return data
-  }
+	private arraytize(data: any | any[]): any[] {
+		if (!Array.isArray(data)) {
+			data = [data];
+		}
+		return data;
+	}
 
-  /**
-   * 측정 시작
-   */
-  beginPedometerMeasurements() {
-    this.onBeginPedometerMeasurements.next();
-  }
+	/**
+	 * 측정 시작
+	 */
+	beginPedometerMeasurements() {
+		this.onBeginPedometerMeasurements.next();
+	}
 
-  /**
-   * 측정 종료
-   */
-  endPedometerMeasurements() {
-    this.onEndPedometerMeasurements.next();
-  }
+	/**
+	 * 측정 종료
+	 */
+	endPedometerMeasurements() {
+		this.onEndPedometerMeasurements.next();
+	}
 
-  public putLogToServer(log: string) {
-    this.onLogToServer.next(log)
-  }
+	public putLogToServer(log: string) {
+		this.onLogToServer.next(log);
+	}
 
-  public putPedometerTimeSegments(data: PedometerTimeSegment | PedometerTimeSegment[]) {
-    this.onPedometerTimeSegment.next(this.arraytize(data))
-  }
+	public putPedometerTimeSegments(data: PedometerTimeSegment | PedometerTimeSegment[]) {
+		this.onPedometerTimeSegment.next(this.arraytize(data));
+	}
 
-  public putPedometerDaySummary(data: PedometerDaySummary | PedometerDaySummary[]) {
-    this.onPedometerDaySummary.next(this.arraytize(data))
-  }
+	public putPedometerDaySummary(data: PedometerDaySummary | PedometerDaySummary[]) {
+		this.onPedometerDaySummary.next(this.arraytize(data));
+	}
 
-  public putPedometerSleepSegment(data: PedometerSleepSegment | PedometerSleepSegment[]) {
-    this.onPedometerSleepSegment.next(this.arraytize(data))
-  }
+	public putPedometerSleepSegment(data: PedometerSleepSegment | PedometerSleepSegment[]) {
+		this.onPedometerSleepSegment.next(this.arraytize(data));
+	}
 
-  public putPedometerHeartrateSegment(data: PedometerHeartrateSegment | PedometerHeartrateSegment[]) {
-    this.onPedometerHeartrateSegment.next(this.arraytize(data))
-  }
+	public putPedometerHeartrateSegment(data: PedometerHeartrateSegment | PedometerHeartrateSegment[]) {
+		this.onPedometerHeartrateSegment.next(this.arraytize(data));
+	}
 
-  public putPedometerSleepSummary(data: PedometerSleepSummary | PedometerSleepSummary[]) {
-    this.onPedometerSleepSummary.next(this.arraytize(data))
-  }
+	public putPedometerSleepSummary(data: PedometerSleepSummary | PedometerSleepSummary[]) {
+		this.onPedometerSleepSummary.next(this.arraytize(data));
+	}
 
-  public putSyncDataPostCallback() {
-    this.onSyncDataPostCallback.next()
-  }
+	public putSyncDataPostCallback() {
+		this.onSyncDataPostCallback.next();
+	}
 }

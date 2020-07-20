@@ -1,50 +1,48 @@
-import { Injectable } from '@angular/core';
-import { CordovaBodyscaleService } from './cordova-bodyscale.service';
-import { Qnscale } from 'ionic-native-qnscale/ngx';
-import { BodyscaleMeasurement } from 'autochek-base/objects/device-data-object';
-
-
+import {Injectable} from '@angular/core';
+import {CordovaBodyscaleService} from './cordova-bodyscale.service';
+import {Qnscale} from 'ionic-native-qnscale/ngx';
+import {BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
 
 
 @Injectable()
 export class DeviceBodyscaleDual {
 
 
-  constructor(
-      private cordovaBodyscaleService: CordovaBodyscaleService,
-      private qnscale: Qnscale
-  ) {
+	constructor(
+		private cordovaBodyscaleService: CordovaBodyscaleService,
+		private qnscale: Qnscale
+	) {
 
-  }
+	}
 
-  async measureStart(height: number, gender: 'male'|'female', year: number, month: number, date: number): Promise<void>{
-    console.log("Dual measure start");
-    try{
-      let res: any = await this.qnscale.connectQnscale(height, gender, year, month, date);
-      console.log("Dual plugin call done");
-      if (typeof(res) === 'string') {
-        res = JSON.parse(res);
-      }
-      const measr = res;
+	async measureStart(height: number, gender: 'male' | 'female', year: number, month: number, date: number): Promise<void> {
+		console.log("Dual measure start");
+		try {
+			let res: any = await this.qnscale.connectQnscale(height, gender, year, month, date);
+			console.log("Dual plugin call done");
+			if (typeof (res) === 'string') {
+				res = JSON.parse(res);
+			}
+			const measr = res;
 
-      const bmi = new BodyscaleMeasurement();
-      bmi.weight = measr.weight;
-      bmi.fat = measr['body fat rate'];
-      bmi.water = measr['body water rate'];
-      bmi.muscle = measr['muscle rate'];
-      bmi.bmr = measr.BMR;
-      bmi.visceral = measr['visceral fat'];
-      bmi.bone = measr['bone mass'];
-      bmi.bmi = measr.BMI;
+			const bmi = new BodyscaleMeasurement();
+			bmi.weight = measr.weight;
+			bmi.fat = measr['body fat rate'];
+			bmi.water = measr['body water rate'];
+			bmi.muscle = measr['muscle rate'];
+			bmi.bmr = measr.BMR;
+			bmi.visceral = measr['visceral fat'];
+			bmi.bone = measr['bone mass'];
+			bmi.bmi = measr.BMI;
 
-      await this.cordovaBodyscaleService.putBodyscaleMeasurement(bmi);
-      return;
+			await this.cordovaBodyscaleService.putBodyscaleMeasurement(bmi);
+			return;
 
-    }catch (error){
-      console.error(error);
-    }
-    return;
-  }
+		} catch (error) {
+			console.error(error);
+		}
+		return;
+	}
 
 
 }
@@ -57,7 +55,6 @@ export class DeviceBodyscaleDual {
 //   } else {
 //     birth = userInfo.birth;
 //   }
-
 
 
 //   const modal = await this.modalController.create({
@@ -92,7 +89,6 @@ export class DeviceBodyscaleDual {
 //   } finally{
 //     modal.dismiss();
 //   }
-
 
 
 //   // console.log(res);

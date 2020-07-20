@@ -1,9 +1,9 @@
-import { BodyscaleDeviceBase } from '../base/BodyscaleDeviceBase'
+import {BodyscaleDeviceBase} from '../base/BodyscaleDeviceBase';
 
 
-const UUID_SERVICE = '0000ffb0-0000-1000-8000-00805f9b34fb'
-const UUID_CHAR_NOTIFY = '0000ffb2-0000-1000-8000-00805f9b34fb'
-const UUID_CHAR_WRITE = '0000ffb1-0000-1000-8000-00805f9b34fb'
+const UUID_SERVICE = '0000ffb0-0000-1000-8000-00805f9b34fb';
+const UUID_CHAR_NOTIFY = '0000ffb2-0000-1000-8000-00805f9b34fb';
+const UUID_CHAR_WRITE = '0000ffb1-0000-1000-8000-00805f9b34fb';
 
 
 // Chipsea-BLE / Black one / Selling
@@ -19,22 +19,22 @@ const UUID_CHAR_WRITE = '0000ffb1-0000-1000-8000-00805f9b34fb'
 
 export class IcomonDevice extends BodyscaleDeviceBase {
 
-  static scanCallback(devicename: string): boolean {
-    return devicename.includes('Icomon')
-  }
+	static scanCallback(devicename: string): boolean {
+		return devicename.includes('Icomon');
+	}
 
 
-  first_connect_callback(): Promise<boolean> {
-    throw new Error('Method not implemented.')
-  }
+	first_connect_callback(): Promise<boolean> {
+		throw new Error('Method not implemented.');
+	}
 
-  repeated_connect_callback(): Promise<boolean> {
-    throw new Error('Method not implemented.')
-  }
+	repeated_connect_callback(): Promise<boolean> {
+		throw new Error('Method not implemented.');
+	}
 
-  sync_callback(): Promise<boolean> {
-    throw new Error('Method not implemented.')
-  }
+	sync_callback(): Promise<boolean> {
+		throw new Error('Method not implemented.');
+	}
 
 
 }
