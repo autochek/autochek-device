@@ -21,7 +21,9 @@ import {ChipseaScaleDevice} from 'autochek-device/objects/third-party/ChipseaSca
 import {AutochekSignatureBpmeter} from 'autochek-device/objects/third-party/AutochekSignagureBpmeter';
 import {Device} from '@ionic-native/device';
 
-
+/**
+ * 장치 타입 목록
+ */
 const deviceList = {
 	pedometer: [
 		Q8Device
@@ -124,7 +126,7 @@ export class DeviceInfoProvider {
 
 		this.initConnectedDevices()
 			.then(() => {
-				this.autoConnectAll()
+				this.autoConnectAll();
 			});
 
 	}
@@ -164,7 +166,7 @@ export class DeviceInfoProvider {
 		this.ble.startScan([])
 			.subscribe(
 				(data) => {
-					// console.log('testscan data', data);
+					// console.log('scan data', data);
 
 					// 이미 검색된 장치가 아닌 경우
 					if (!foundDevice.has(data.id)) {
@@ -234,7 +236,7 @@ export class DeviceInfoProvider {
 	 */
 	private addDevice(device: DeviceBase) {
 
-		console.log('DeviceInfoProvider.addDevice', device);
+		console.log('DeviceInfoProvider.addDevice : ', this.connectedDevices, device);
 
 		// 연결된 장치 목록이 존재하지 않는 경우
 		if (!this.connectedDevices)
@@ -379,12 +381,29 @@ export class DeviceInfoProvider {
 
 			// ios인 경우
 			if (Device.platform.toLowerCase() === "ios") {
-				const identifiers = await this.ble.peripheralsWithIdentifiers([device.id]);
+				//const identifiers = await this.ble.peripheralsWithIdentifiers([device.id]);
 			}
 
 			// 장치 연결
 			result = await this.connect_promise(device);
 		}
+
+		return result;
+	}
+
+	/**
+	 * 등록된 특정 타입의 장치 정보 목록을 가져온다.
+	 * @param type 장치 타입
+	 */
+	getBondedDevices(type: string): DeviceBase[] {
+		// 장치 목록
+		let result: DeviceBase[] = [];
+
+		console.log("DeviceInfoProvider.getBondedDevices : ", this.connectedDevices);
+
+		// 등록된 기기 목록이 존재하는 경우, 해당 기기 타입의 장치 목록을 가져온다.
+		if (this.connectedDevices && this.connectedDevices[type])
+			result = this.connectedDevices[type];
 
 		return result;
 	}
@@ -464,12 +483,12 @@ export class DeviceInfoProvider {
 
 		console.log('DeviceInfoProvider.connect_promise', device, isFirst);
 
-		return new Promise<boolean>((res, rej) => {
+		return new Promise<boolean>((res/*, rej*/) => {
 			// 장치 연결
 			this.ble.connect(device.id)
 				.subscribe(
 					// 연결 성공
-					async (peripheral) => {
+					async (/*peripheral*/) => {
 
 						// console.log('connect ble callback', peripheral);
 
@@ -477,7 +496,7 @@ export class DeviceInfoProvider {
 						res(await this.generalConnectPostCallback(device, isFirst));
 					},
 					// 연결 에러 (연결해제 콜백)
-					async (peripheral) => {
+					async (/*peripheral*/) => {
 
 						console.log('disconnect callback from connect_promise');
 
@@ -655,7 +674,10 @@ export class DeviceInfoProvider {
 		this.removeDevice(device);
 	}
 
-	// connectedDevice->storageData
+	/**
+	 * 장치 정보 객체를 장치 정보 StorageData로 변환한다.
+	 * @param cds 연결된 장치 정보
+	 */
 	private serializer(cds: ConnectedDevice): StorageData {
 
 		const nsds = Object.assign({}, defaultStorageData);
@@ -671,7 +693,10 @@ export class DeviceInfoProvider {
 		return nsds;
 	}
 
-	// storageData->connectedDevice
+	/**
+	 * 장치 정보 StorageData를 장치 정보 객체로 변환한다.
+	 * @param storageData 장치 정보 StorageData
+	 */
 	private deserializer(storageData: StorageData): ConnectedDevice {
 		const ncds = Object.assign({}, defaultConnectedDevice);
 

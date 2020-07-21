@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
 
 
@@ -26,9 +26,12 @@ export const DefaultScaleUser: ScaleUser = {
  */
 @Injectable()
 export class CordovaBodyscaleService {
-	onBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();
-	onBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
-	onEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
+	private emitBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();
+	private emitBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
+	private emitEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
+	onBeginBodyscaleMeasurment: Observable<void> = this.emitBeginBodyscaleMeasurment.asObservable();
+	onBodyscaleMeasurment: Observable<BodyscaleMeasurement[]> = this.emitBodyscaleMeasurment.asObservable();
+	onEndBodyscaleMeasurment: Observable<void> = this.emitEndBodyscaleMeasurment.asObservable();
 
 	/**
 	 * 생성자
@@ -57,14 +60,14 @@ export class CordovaBodyscaleService {
 	 * 측정 시작
 	 */
 	beginBodyscaleMeasurement() {
-		this.onBeginBodyscaleMeasurment.next();
+		this.emitBeginBodyscaleMeasurment.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
 	endBodyscaleMeasurement() {
-		this.onEndBodyscaleMeasurment.next();
+		this.emitEndBodyscaleMeasurment.next();
 	}
 
 	/**
@@ -75,6 +78,6 @@ export class CordovaBodyscaleService {
 		if (!Array.isArray(measurements)) {
 			measurements = [measurements];
 		}
-		this.onBodyscaleMeasurment.next(measurements);
+		this.emitBodyscaleMeasurment.next(measurements);
 	}
 }

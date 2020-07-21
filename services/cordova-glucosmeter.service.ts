@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 import {GlucosemeterMeasurement} from 'autochek-base/objects/device-data-object';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 
 /**
  * 혈당계 서비스 클래스
@@ -9,9 +9,12 @@ import {Subject} from 'rxjs';
 @Injectable()
 export class CordovaGlucosemeterService {
 
-	onBeginGlucosemeterMeasurements: Subject<void> = new Subject<void>();
-	onGlucosemeterMeasurements: Subject<GlucosemeterMeasurement[]> = new Subject<GlucosemeterMeasurement[]>()
-	onEndGlucosemeterMeasurements: Subject<void> = new Subject<void>();
+	private emitBeginGlucosemeterMeasurements: Subject<void> = new Subject<void>();
+	private emitGlucosemeterMeasurements: Subject<GlucosemeterMeasurement[]> = new Subject<GlucosemeterMeasurement[]>()
+	private emitEndGlucosemeterMeasurements: Subject<void> = new Subject<void>();
+	onBeginGlucosemeterMeasurements: Observable<void> = this.emitBeginGlucosemeterMeasurements.asObservable();
+	onGlucosemeterMeasurements: Observable<GlucosemeterMeasurement[]> = this.emitGlucosemeterMeasurements.asObservable();
+	onEndGlucosemeterMeasurements: Observable<void> = this.emitEndGlucosemeterMeasurements.asObservable();
 
 	/**
 	 * 생성자
@@ -27,14 +30,14 @@ export class CordovaGlucosemeterService {
 	 * 측정 시작
 	 */
 	beginGlucosemeterMeasurements() {
-		this.onBeginGlucosemeterMeasurements.next();
+		this.emitBeginGlucosemeterMeasurements.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
 	endGlucosemeterMeasurements() {
-		this.onEndGlucosemeterMeasurements.next();
+		this.emitEndGlucosemeterMeasurements.next();
 	}
 
 	/**
@@ -45,6 +48,6 @@ export class CordovaGlucosemeterService {
 		if (!Array.isArray(measurements)) {
 			measurements = [measurements];
 		}
-		this.onGlucosemeterMeasurements.next(measurements);
+		this.emitGlucosemeterMeasurements.next(measurements);
 	}
 }

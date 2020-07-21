@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {BloodpressureMeasurement} from 'autochek-base/objects/device-data-object';
 
 /**
@@ -10,9 +10,12 @@ import {BloodpressureMeasurement} from 'autochek-base/objects/device-data-object
 @Injectable()
 export class CordovaBpmeterService {
 
-	onBeginBloodpressureMeasurement: Subject<void> = new Subject<void>();
-	onBloodpressureMeasurement: Subject<BloodpressureMeasurement[]> = new Subject<BloodpressureMeasurement[]>()
-	onEndBloodpressureMeasurement: Subject<void> = new Subject<void>();
+	private emitBeginBloodpressureMeasurement: Subject<void> = new Subject<void>();
+	private emitBloodpressureMeasurement: Subject<BloodpressureMeasurement[]> = new Subject<BloodpressureMeasurement[]>()
+	private emitEndBloodpressureMeasurement: Subject<void> = new Subject<void>();
+	onBeginBloodpressureMeasurement: Observable<void> = this.emitBeginBloodpressureMeasurement.asObservable();
+	onBloodpressureMeasurement: Observable<BloodpressureMeasurement[]> = this.emitBloodpressureMeasurement.asObservable();
+	onEndBloodpressureMeasurement: Observable<void> = this.emitEndBloodpressureMeasurement.asObservable();
 
 	/**
 	 * 생성자
@@ -27,14 +30,14 @@ export class CordovaBpmeterService {
 	 * 측정 시작
 	 */
 	beginBloodpressureMeasurement() {
-		this.onBeginBloodpressureMeasurement.next();
+		this.emitBeginBloodpressureMeasurement.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
 	endBloodpressureMeasurement() {
-		this.onEndBloodpressureMeasurement.next();
+		this.emitEndBloodpressureMeasurement.next();
 	}
 
 	/**
@@ -47,6 +50,6 @@ export class CordovaBpmeterService {
 			measurements = [measurements];
 		}
 
-		this.onBloodpressureMeasurement.next(measurements);
+		this.emitBloodpressureMeasurement.next(measurements);
 	}
 }
