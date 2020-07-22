@@ -48,10 +48,10 @@ export class DeviceBodyscaleDual {
 		this.emitBodyscaleMeasurment.next(measurements);
 	}
 
-	async measureStart(height: number, gender: 'male' | 'female', year: number, month: number, date: number): Promise<void> {
+	async measureStart(deviceId: string, userId: string, height: number, gender: 'male' | 'female', year: number, month: number, date: number): Promise<void> {
 		console.log("Dual measure start");
 		try {
-			let res: any = await this.qnscale.connectQnscale(height, gender, year, month, date);
+			let res: any = await this.qnscale.connect(deviceId, userId, height, gender, year, month, date);
 			console.log("Dual plugin call done");
 			if (typeof (res) === 'string') {
 				res = JSON.parse(res);
@@ -68,7 +68,7 @@ export class DeviceBodyscaleDual {
 			bmi.bone = measr['bone mass'];
 			bmi.bmi = measr.BMI;
 
-			await this.cordovaBodyscaleService.putBodyscaleMeasurement(bmi);
+			await this.cordovaBodyscaleService.putSyncData(bmi);
 			return;
 
 		} catch (error) {

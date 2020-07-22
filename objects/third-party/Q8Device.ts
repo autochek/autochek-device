@@ -4,7 +4,7 @@ import {PedometerDeviceBase} from '../base/PedometerDeviceBase';
 import * as moment from 'moment';
 import {
 	PedometerDaySummary, PedometerTimeSegment, PedometerSleepSummary, PedometerSleepSegment,
-	PedometerHeartrateSegment
+	PedometerHeartrateSegment, PedometerMeasurement
 } from 'autochek-base/objects/device-data-object';
 import {CordovaPedometerService} from 'autochek-device/services/cordova-pedometer.service';
 
@@ -22,14 +22,14 @@ const timeout = 30000;
 export class Q8Device extends PedometerDeviceBase {
 
 
-	private com_l1_queue: L1Packet[];
-	private com_acker: Subject<any>;
-	private com_is_acked: number;
+	private comL1Queue: L1Packet[];
+	private comAcker: Subject<any>;
+	private comIsAcked: number;
 
 	private logLevel: number = 2;
 
 
-	private connection_phase = 0;
+	private connectionPhase = 0;
 
 	private historyDataRequestList: string[] = ['01', '02', '04', '0a', '0b', '03', '10'];
 	private historyDataRequestIndex: number = 0;
@@ -49,8 +49,8 @@ export class Q8Device extends PedometerDeviceBase {
 	private syncLogString: string = '';
 
 
-	connection_promise_response: (value: boolean) => void = null;
-	sync_promise_response: (value: boolean) => void = null;
+	connectionPromiseResponse: (value: boolean) => void = null;
+	syncPromiseResponse: (value: boolean) => void = null;
 
 	static scanCallback(devicename: string): boolean {
 		return devicename.includes('HC92');
@@ -61,21 +61,21 @@ export class Q8Device extends PedometerDeviceBase {
 		this.className = 'Q8Device';
 
 
-		// this.com_l1_queue = [];
-		// this.com_acker = new Subject<any>();
-		// this.com_is_acked = -1;
+		// this.comL1Queue = [];
+		// this.comAcker = new Subject<any>();
+		// this.comIsAcked = -1;
 		// ACK_OFFSET = 0;
 	}
 
 
 	async first_connect_callback(): Promise<boolean> {
-		if (this.connection_promise_response != null) {
+		if (this.connectionPromiseResponse != null) {
 			return false;
 		}
 
 
 		const promise = new Promise<boolean>((res, rej) => {
-			this.connection_promise_response = res;
+			this.connectionPromiseResponse = res;
 			setTimeout(() => {
 				res(false);
 			}, timeout);
@@ -87,20 +87,20 @@ export class Q8Device extends PedometerDeviceBase {
 
 		this.writeL2('00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:7f:ff:ff:ff:00:00:00', 3, 1);
 		const result: boolean = await promise;
-		this.connection_promise_response = null;
+		this.connectionPromiseResponse = null;
 
 		return result;
 	}
 
 
 	async repeated_connect_callback(): Promise<boolean> {
-		if (this.connection_promise_response != null) {
+		if (this.connectionPromiseResponse != null) {
 			return false;
 		}
 
 
 		const promise = new Promise<boolean>((res, rej) => {
-			this.connection_promise_response = res;
+			this.connectionPromiseResponse = res;
 			setTimeout(() => {
 				res(false);
 			}, timeout);
@@ -109,7 +109,7 @@ export class Q8Device extends PedometerDeviceBase {
 		this.general_connection_callback();
 		this.writeL2('00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:7f:ff:ff:ff:00:00:00', 3, 3);
 		const result: boolean = await promise;
-		this.connection_promise_response = null;
+		this.connectionPromiseResponse = null;
 
 
 		// this.sync_callback(); // TODO: Test required
@@ -118,10 +118,10 @@ export class Q8Device extends PedometerDeviceBase {
 
 	async sync_callback(): Promise<boolean> {
 
-		if (!this.com_acker) {
+		if (!this.comAcker) {
 			this.general_connection_callback();
 		}
-		if (this.sync_promise_response != null) {
+		if (this.syncPromiseResponse != null) {
 			return false;
 		}
 
@@ -143,7 +143,7 @@ export class Q8Device extends PedometerDeviceBase {
 		this.pedometerHeartrateSegments = [];
 
 		const promise = new Promise<boolean>((res, rej) => {
-			this.sync_promise_response = res;
+			this.syncPromiseResponse = res;
 			setTimeout(() => {
 				res(false);
 			}, timeout);
@@ -152,19 +152,19 @@ export class Q8Device extends PedometerDeviceBase {
 		this.pushProgressString('동기화 시작');
 		this.writeL2(this.historyDataRequestList[this.historyDataRequestIndex], 0x05, 0x01);
 		const result: boolean = await promise;
-		this.sync_promise_response = null;
+		this.syncPromiseResponse = null;
 		return result;
 
 	}
 
 
 	general_connection_callback() {
-		this.com_l1_queue = [];
-		this.com_acker = new Subject<any>();
-		this.com_is_acked = -1;
+		this.comL1Queue = [];
+		this.comAcker = new Subject<any>();
+		this.comIsAcked = -1;
 		ACK_OFFSET = 0;
 
-		this.connection_phase = 0;
+		this.connectionPhase = 0;
 		// this.connection_result = new Promise<boolean>((res,rej)=>{});
 
 		let l1Collector: L1Packet = null;
@@ -189,8 +189,8 @@ export class Q8Device extends PedometerDeviceBase {
 				if (l1Collector.isAckPacket()) {
 					// console.log(0, 'Received ack : ' + x2s(l1Collector.ack));
 
-					this.com_is_acked = l1Collector.ack;
-					this.com_acker.next();
+					this.comIsAcked = l1Collector.ack;
+					this.comAcker.next();
 				} else {
 					// console.log(0, 'Received full L1 packet' + l1Collector);
 					const l2received = l1Collector.genL2Packet();
@@ -204,16 +204,16 @@ export class Q8Device extends PedometerDeviceBase {
 			}
 		)
 
-		this.com_acker.subscribe(
+		this.comAcker.subscribe(
 			() => {
 
-				if (this.com_l1_queue.length === 0) {
+				if (this.comL1Queue.length === 0) {
 					return;
 				}
-				if (this.com_is_acked < this.com_l1_queue[0].ack - 1) {
+				if (this.comIsAcked < this.comL1Queue[0].ack - 1) {
 					return;
 				}
-				const l1pack = this.com_l1_queue.shift();
+				const l1pack = this.comL1Queue.shift();
 				// console.log(0, 'Actual L1 packet sending ' + l1pack);
 				// console.log(1, 'Writing L2 ' + l1pack.genL2Packet());
 
@@ -239,7 +239,7 @@ export class Q8Device extends PedometerDeviceBase {
 				this.writeL2('01', 2, 0x22);
 				this.writeL2('', 2, 0x1e);
 			} else {
-				this.connection_promise_response(true);
+				this.connectionPromiseResponse(true);
 
 			}
 
@@ -254,26 +254,26 @@ export class Q8Device extends PedometerDeviceBase {
 
 			this.writeL2(packDate(), 2, 0x01);
 
-			this.connection_phase = 0;
+			this.connectionPhase = 0;
 			this.writeL2('', 2, 0x14); // GOTO phase0
 
 		}
 
 		if (packet.cmdid === 2 && packet.keyid === 0x15) {
 
-			if (this.connection_phase === 0) {
+			if (this.connectionPhase === 0) {
 				// configure screen
-				this.connection_phase++;
+				this.connectionPhase++;
 				// this.writeL2('02af', 2, 0x18);
 
 				this.writeL2('002f', 2, 0x18); // 00 2f : Time, steps, Distance, calories, heartrate,
 				this.writeL2('', 2, 0x14); // GOTO phase1
-			} else if (this.connection_phase === 1) {
+			} else if (this.connectionPhase === 1) {
 				this.writeL2('010000059f', 2, 0x1c);
-				this.connection_phase++;
+				this.connectionPhase++;
 				this.configDrinkingWater(true, 120, 540, 1260);
 				this.configSedentary(true, 540, 1260);
-				this.connection_promise_response(true);
+				this.connectionPromiseResponse(true);
 			}
 		}
 
@@ -368,19 +368,20 @@ export class Q8Device extends PedometerDeviceBase {
 				this.pedometerSleepSummaries = this.parseSleep(packet.value);
 
 				this.pushProgressString('동기화를 종료중입니다');
-				this.service.putLogToServer(this.syncLogString);
 
-				this.service.putPedometerTimeSegments(this.pedometerTimeSegments);
-				this.service.putPedometerDaySummary(this.pedometerDaySummaries[0]);
-				this.service.putPedometerSleepSegment(this.pedometerSleepSegments);
-				this.service.putPedometerHeartrateSegment(this.pedometerHeartrateSegments);
-				this.service.putPedometerSleepSummary(this.pedometerSleepSummaries);
+				const data: PedometerMeasurement = new PedometerMeasurement();
+				data.log = this.syncLogString;
+				data.timeSegments = this.pedometerTimeSegments;
+				data.daySummaries = [this.pedometerDaySummaries[0]];
+				data.sleepSegments = this.pedometerSleepSegments;
+				data.heartrateSegments = this.pedometerHeartrateSegments;
+				data.sleepSummaries = this.pedometerSleepSummaries;
 
-				this.service.putSyncDataPostCallback();
+				this.service.putSyncData(data);
 
 				this.pushProgressString('동기화가 완료 되었습니다.' + moment().format('hh시mm분'));
 
-				this.sync_promise_response(true);
+				this.syncPromiseResponse(true);
 
 			}
 
@@ -397,18 +398,18 @@ export class Q8Device extends PedometerDeviceBase {
 		while (value.length > 0) {
 			console.log('Iter \'value\' string : length - ', value.length);
 			const length: number = parseInt(value.substring(0, 4), 16);
-			const d_date: Date = parseDateBlock(value.substring(4, 8));
-			const i_minute: number = parseInt(value.substring(8, 12), 16);
+			const dDate: Date = parseDateBlock(value.substring(4, 8));
+			const iMinute: number = parseInt(value.substring(8, 12), 16);
 
-			console.log(1, 'act segment chunk', d_date, i_minute, length);
-			const e_idx = 16 + 4 * length;
+			console.log(1, 'act segment chunk', dDate, iMinute, length);
+			const eIndex = 16 + 4 * length;
 
 			let logStartDate: Date = null;
 			let logCount: number = 0;
 			let logEndDate: Date = null;
 
 
-			const subvalue: string = value.substring(16, e_idx);
+			const subvalue: string = value.substring(16, eIndex);
 			for (let i = 0; i < length; i++) {
 				if ((i * 4 + 4) >= subvalue.length) {
 					// TODO : there are several times... break;
@@ -418,13 +419,13 @@ export class Q8Device extends PedometerDeviceBase {
 				if (isNaN(step)) {
 					step = 0;
 				}
-				let minute = i_minute + i * 5;
+				let minute = iMinute + i * 5;
 				// console.log(1, 'Parsing datetime log[0]', i_minute, i, minute);
 				const hour = Math.floor(minute / 60);
 				minute = minute % 60;
 
 				// console.log(1, 'Parsing datetime log[1]', hour, minute);
-				const d = new Date(d_date);
+				const d = new Date(dDate);
 				d.setHours(hour);
 				d.setMinutes(minute);
 				d.setSeconds(0);
@@ -443,7 +444,7 @@ export class Q8Device extends PedometerDeviceBase {
 			this.syncLogString += `PedometerTimeSegment parse summary : ${logCount} from ${moment(logStartDate).format('YYYYMMDD HH:mm')} to ${moment(logEndDate).format('YYYYMMDD HH:mm')}||\r\n`;
 
 
-			value = value.substring(e_idx);
+			value = value.substring(eIndex);
 		}
 
 
@@ -481,27 +482,27 @@ export class Q8Device extends PedometerDeviceBase {
 
 		while (value.length > 0) {
 			const length: number = parseInt(value.substring(0, 4), 16);
-			const d_date: Date = parseDateBlock(value.substring(4, 8));
-			const i_minute: number = parseInt(value.substring(8, 12), 16);
+			const dDate: Date = parseDateBlock(value.substring(4, 8));
+			const iMinute: number = parseInt(value.substring(8, 12), 16);
 
-			const e_idx = 16 + 2 * length;
+			const eIndex = 16 + 2 * length;
 
 			const subvalue: string = value.substring(16);
 			for (let i = 0; i < length; i++) {
 				const sleepIndex = parseInt(subvalue.substring(i * 2, i * 2 + 2), 16);
-				let minute = i_minute + i * 5;
+				let minute = iMinute + i * 5;
 
 				const hour = Math.floor(minute / 60);
 				minute = minute % 60;
 
-				const d = new Date(d_date);
+				const d = new Date(dDate);
 				d.setHours(hour);
 				d.setMinutes(minute);
 				d.setSeconds(0);
 
 				segments.push(new PedometerSleepSegment(d, sleepIndex));
 			}
-			value = value.substring(e_idx);
+			value = value.substring(eIndex);
 		}
 
 
@@ -514,34 +515,34 @@ export class Q8Device extends PedometerDeviceBase {
 
 		while (value.length > 0) {
 			const length: number = parseInt(value.substring(0, 4), 16);
-			const d_date: Date = parseDateBlock(value.substring(4, 8));
-			const i_minute: number = parseInt(value.substring(8, 12), 16);
+			const dDate: Date = parseDateBlock(value.substring(4, 8));
+			const iMinute: number = parseInt(value.substring(8, 12), 16);
 
-			const e_idx = 16 + 2 * length;
+			const eIndex = 16 + 2 * length;
 
 			const subvalue: string = value.substring(16);
 			for (let i = 0; i < length; i++) {
 				const rate = parseInt(subvalue.substring(i * 2, i * 2 + 2), 16);
-				let minute = i_minute + i * 5;
+				let minute = iMinute + i * 5;
 
 				const hour = Math.floor(minute / 60);
 				minute = minute % 60;
 
-				const d = new Date(d_date);
+				const d = new Date(dDate);
 				d.setHours(hour);
 				d.setMinutes(minute);
 				d.setSeconds(0);
 
 				segments.push(new PedometerHeartrateSegment(d, rate));
 			}
-			value = value.substring(e_idx);
+			value = value.substring(eIndex);
 		}
 		return segments;
 	}
 
 	private writeL2(value: string, cmdid: number, keyid: number) {
-		this.com_l1_queue.push(new L1Packet(new L2Packet(value, cmdid, keyid)));
-		this.com_acker.next();
+		this.comL1Queue.push(new L1Packet(new L2Packet(value, cmdid, keyid)));
+		this.comAcker.next();
 	}
 
 	private writeToDevice(packet: PacketSegment) {
@@ -625,11 +626,11 @@ class L1Packet extends PacketBase {
 			this.crc = crc16Arc(data.str);
 			this.ack = ACK_OFFSET++;
 
-			const l1_header = 'ab00' + x2s(this.length, 4)
+			const l1Header = 'ab00' + x2s(this.length, 4)
 				+ x2s(this.crc, 4) // crc
 				+ x2s(this.ack, 4);
 
-			this.str = l1_header + data.str;
+			this.str = l1Header + data.str;
 		}
 		if (data instanceof PacketSegment) {
 			this.str = data.str;
@@ -730,10 +731,10 @@ class L2Packet extends PacketBase {
 			this.value = reduce_hexstring(value);
 			this.length = this.value.length / 2;
 
-			const l2_header = x2s(cmdid, 2) + x2s(0, 2) + x2s(keyid, 2) + x2s(this.length, 4);
+			const l2Header = x2s(cmdid, 2) + x2s(0, 2) + x2s(keyid, 2) + x2s(this.length, 4);
 
 
-			this.str = l2_header + this.value;
+			this.str = l2Header + this.value;
 		}
 	}
 

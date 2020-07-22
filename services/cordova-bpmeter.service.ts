@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
 import {Observable, Subject} from 'rxjs';
-import {BloodpressureMeasurement} from 'autochek-base/objects/device-data-object';
+import {BloodpressureMeasurement, BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
 
 /**
  * 혈압계 서비스 클래스
@@ -10,12 +10,46 @@ import {BloodpressureMeasurement} from 'autochek-base/objects/device-data-object
 @Injectable()
 export class CordovaBpmeterService {
 
-	private emitBeginBloodpressureMeasurement: Subject<void> = new Subject<void>();
-	private emitBloodpressureMeasurement: Subject<BloodpressureMeasurement[]> = new Subject<BloodpressureMeasurement[]>()
-	private emitEndBloodpressureMeasurement: Subject<void> = new Subject<void>();
-	onBeginBloodpressureMeasurement: Observable<void> = this.emitBeginBloodpressureMeasurement.asObservable();
-	onBloodpressureMeasurement: Observable<BloodpressureMeasurement[]> = this.emitBloodpressureMeasurement.asObservable();
-	onEndBloodpressureMeasurement: Observable<void> = this.emitEndBloodpressureMeasurement.asObservable();
+	/**
+	 * 장치 연결 시작 Subject
+	 */
+	private emitBeginConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 종료 Subject
+	 */
+	private emitEndConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 시작 Subject
+	 */
+	private emitBeginSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 Subject
+	 */
+	private emitSyncData: Subject<BloodpressureMeasurement[]> = new Subject<BloodpressureMeasurement[]>();
+	/**
+	 * 데이터 동기화 종료 Subject
+	 */
+	private emitEndSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 시작 Observable
+	 */
+	onBeginConnect: Observable<void> = this.emitBeginConnect.asObservable();
+	/**
+	 * 장치 연결 종료 Observable
+	 */
+	onEndConnect: Observable<void> = this.emitEndConnect.asObservable();
+	/**
+	 * 데이터 동기화 시작 Observable
+	 */
+	onBeginSyncData: Observable<void> = this.emitBeginSyncData.asObservable();
+	/**
+	 * 데이터 동기화 Observable
+	 */
+	onSyncData: Observable<BloodpressureMeasurement[]> = this.emitSyncData.asObservable();
+	/**
+	 * 데이터 동기화 종료 Observable
+	 */
+	onEndSyncData: Observable<void> = this.emitEndSyncData.asObservable();
 
 	/**
 	 * 생성자
@@ -27,29 +61,43 @@ export class CordovaBpmeterService {
 	}
 
 	/**
+	 * 연결 시작
+	 */
+	beginConnect() {
+		this.emitBeginConnect.next();
+	}
+
+	/**
+	 * 연결 종료
+	 */
+	endConnect() {
+		this.emitEndConnect.next();
+	}
+
+	/**
 	 * 측정 시작
 	 */
-	beginBloodpressureMeasurement() {
-		this.emitBeginBloodpressureMeasurement.next();
+	beginSyncData() {
+		this.emitBeginSyncData.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
-	endBloodpressureMeasurement() {
-		this.emitEndBloodpressureMeasurement.next();
+	endSyncData() {
+		this.emitEndSyncData.next();
 	}
 
 	/**
 	 * 측정 데이터 전달
 	 * @param measurements 측정 데이터
 	 */
-	putBloodpressureMeasurement(measurements: BloodpressureMeasurement | BloodpressureMeasurement[]) {
+	putSyncData(measurements: BloodpressureMeasurement | BloodpressureMeasurement[]) {
 
 		if (!Array.isArray(measurements)) {
 			measurements = [measurements];
 		}
 
-		this.emitBloodpressureMeasurement.next(measurements);
+		this.emitSyncData.next(measurements);
 	}
 }

@@ -111,7 +111,7 @@ export class QnScaleDevice extends BodyscaleDeviceBase {
 						const bmi = new BodyscaleMeasurement();
 						bmi.weight = weight;
 						bmi.date = new Date();
-						this.service.putBodyscaleMeasurement(bmi);
+						this.service.putSyncData(bmi);
 						// TODO what is it?
 						this.write(UUID_SERVICE, 'ffe3', Buffer.from('1f05151049', 'hex').buffer);
 						// TODO : When byte[3]==01, write some kind of ack packet

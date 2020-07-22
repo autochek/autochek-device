@@ -28,9 +28,9 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
 
 	// connection_success = ()=>{};
-	syncdate_success = (br: boolean) => {
+	syncdateSuccess = (br: boolean) => {
 	}
-	getrecord_success = (br: boolean) => {
+	getrecordSuccess = (br: boolean) => {
 	}
 
 	constructor(protected service: CordovaGlucosemeterService, id: string, name: string, extra?: object) {
@@ -57,7 +57,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 		const res = await this.getRecordFull();
 
 		if (res) {
-			this.service.putGlucosemeterMeasurements(this.glucosemeterMeasurements);
+			this.service.putSyncData(this.glucosemeterMeasurements);
 			this.glucosemeterMeasurements = [];
 		}
 
@@ -74,14 +74,14 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 			.subscribe(async (buffer) => {
 				// console.log('measurement recieved', buffer);
 				const value: string = bufferToHex(buffer);
-				const idx_msr: number = parseInt(bigLittleConversion(value.substring(2, 6)), 16);
+				const idxMsr: number = parseInt(bigLittleConversion(value.substring(2, 6)), 16);
 
-				const date_base: Date = parseDate(value.substring(6, 20));
-				const time_offset: number = parseInt(bigLittleConversion(value.substring(20, 24)), 10);
-				const date_msr: Date = moment(date_base).add(time_offset, 'minute').toDate();
+				const dateBase: Date = parseDate(value.substring(6, 20));
+				const timeOffset: number = parseInt(bigLittleConversion(value.substring(20, 24)), 10);
+				const dateMsr: Date = moment(dateBase).add(timeOffset, 'minute').toDate();
 				const bgm: number = parseSfloat(bigLittleConversion(value.substring(24, 28)));
 
-				this.glucosemeterMeasurements.push(new GlucosemeterMeasurement(date_msr, bgm));
+				this.glucosemeterMeasurements.push(new GlucosemeterMeasurement(dateMsr, bgm));
 			});
 
 		this.startNotification(UUID_SERVICE_GLUCOSE, UUID_CHARACTERISTIC_CONTEXT)
@@ -116,7 +116,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
 					// this.service.putGlucosemeterMeasurements(this.glucosemeterMeasurements);
 					// this.glucosemeterMeasurements = [];
-					this.getrecord_success(true);
+					this.getrecordSuccess(true);
 					// this.deviceDataProvider.dataSynced();
 
 					// this.service.putGlucosemeterMeasurements(this.glucosemeterMeasurements);
@@ -130,7 +130,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 				const value: string = bufferToHex(buffer);
 				if (value.startsWith('0500')) {
 					// sync date return
-					this.syncdate_success(true);
+					this.syncdateSuccess(true);
 				}
 			});
 	}
@@ -140,7 +140,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 		const packet: string = `c0030100${packDate(datetime)}`;
 
 		const promise = new Promise<boolean>((res, rej) => {
-			this.syncdate_success = (br: boolean) => {
+			this.syncdateSuccess = (br: boolean) => {
 				res(br);
 			};
 			setTimeout(() => {
@@ -156,7 +156,7 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 		this.glucosemeterMeasurements = [];
 
 		const promise = new Promise<boolean>((res, rej) => {
-			this.getrecord_success = (br: boolean) => {
+			this.getrecordSuccess = (br: boolean) => {
 				res(br);
 			};
 			setTimeout(() => {
@@ -168,9 +168,9 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 	}
 
 
-	private async writeHex(u_service: string, u_characteristic: string, hex: string) {
-		console.log('AutochekBGMDevice - writeHex', u_service, u_characteristic, hex);
-		return this.write(u_service, u_characteristic, Buffer.from(hex, 'hex').buffer as ArrayBuffer);
+	private async writeHex(uService: string, uCharacteristic: string, hex: string) {
+		console.log('AutochekBGMDevice - writeHex', uService, uCharacteristic, hex);
+		return this.write(uService, uCharacteristic, Buffer.from(hex, 'hex').buffer as ArrayBuffer);
 	}
 
 
@@ -200,32 +200,33 @@ function n2x(num: number, paddings: number = 2): string {
 }
 
 function packDate(datetime: Date): string {
-	const s_year: string = bigLittleConversion(n2x(datetime.getFullYear(), 4));
-	const s_month: string = n2x(datetime.getMonth() + 1);
-	const s_date: string = n2x(datetime.getDate());
-	const s_hour: string = n2x(datetime.getHours());
-	const s_minute: string = n2x(datetime.getMinutes());
-	const s_second: string = n2x(datetime.getSeconds());
-	return `${s_year}${s_month}${s_date}${s_hour}${s_minute}${s_second}`;
+	const year: string = bigLittleConversion(n2x(datetime.getFullYear(), 4));
+	const month: string = n2x(datetime.getMonth() + 1);
+	const date: string = n2x(datetime.getDate());
+	const hour: string = n2x(datetime.getHours());
+	const minute: string = n2x(datetime.getMinutes());
+	const second: string = n2x(datetime.getSeconds());
+	return `${year}${month}${date}${hour}${minute}${second}`;
 }
 
 function parseDate(dtstr: string): Date {
-	const n_year: number = parseInt(bigLittleConversion(dtstr.substring(0, 4)), 16);
-	const n_month: number = parseInt(dtstr.substring(4, 6), 16) - 1;
-	const n_date: number = parseInt(dtstr.substring(6, 8), 16);
-	const n_hour: number = parseInt(dtstr.substring(8, 10), 16);
-	const n_minute: number = parseInt(dtstr.substring(10, 12), 16);
-	const n_second: number = parseInt(dtstr.substring(12, 14), 16);
+	const result = new Date();
 
-	const date = new Date();
-	date.setFullYear(n_year);
-	date.setMonth(n_month);
-	date.setDate(n_date);
-	date.setHours(n_hour);
-	date.setMinutes(n_minute);
-	date.setSeconds(n_second);
-	return date;
+	const year: number = parseInt(bigLittleConversion(dtstr.substring(0, 4)), 16);
+	const month: number = parseInt(dtstr.substring(4, 6), 16) - 1;
+	const date: number = parseInt(dtstr.substring(6, 8), 16);
+	const hour: number = parseInt(dtstr.substring(8, 10), 16);
+	const minute: number = parseInt(dtstr.substring(10, 12), 16);
+	const second: number = parseInt(dtstr.substring(12, 14), 16);
 
+	result.setFullYear(year);
+	result.setMonth(month);
+	result.setDate(date);
+	result.setHours(hour);
+	result.setMinutes(minute);
+	result.setSeconds(second);
+	
+	return result;
 }
 
 function parseSfloat(sfloat: string): number { // To mmg/dl

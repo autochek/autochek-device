@@ -55,7 +55,7 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 				if (status === 0) {
 
 					// 동기화 시작
-					this.service.beginBodyscaleMeasurement();
+					this.service.beginSyncData();
 
 					// this.bodyscaleDataProvider.refreshBodyscaleRealtime(packet);
 
@@ -75,15 +75,15 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 								bmi.fat -= bmi.visceral * 0.63;
 							}
 
-							this.service.putBodyscaleMeasurement(bmi);
+							this.service.putSyncData(bmi);
 							// this.bodyscaleDataProvider.addBodyscaleRecent(bmi);
 						} else {
-							this.service.putBodyscaleMeasurement(packet);
+							this.service.putSyncData(packet);
 							// this.bodyscaleDataProvider.addBodyscaleRecent(packet);
 						}
 
 						// 동기화 종료
-						this.service.endBodyscaleMeasurement();
+						this.service.endSyncData();
 					}
 				}
 

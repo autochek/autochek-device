@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
 import {Observable, Subject} from 'rxjs';
-import {BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
+import {BloodpressureMeasurement, BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
 
 
 export interface ScaleUser {
@@ -26,12 +26,47 @@ export const DefaultScaleUser: ScaleUser = {
  */
 @Injectable()
 export class CordovaBodyscaleService {
-	private emitBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();
-	private emitBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
-	private emitEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
-	onBeginBodyscaleMeasurment: Observable<void> = this.emitBeginBodyscaleMeasurment.asObservable();
-	onBodyscaleMeasurment: Observable<BodyscaleMeasurement[]> = this.emitBodyscaleMeasurment.asObservable();
-	onEndBodyscaleMeasurment: Observable<void> = this.emitEndBodyscaleMeasurment.asObservable();
+
+	/**
+	 * 장치 연결 시작 Subject
+	 */
+	private emitBeginConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 종료 Subject
+	 */
+	private emitEndConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 시작 Subject
+	 */
+	private emitBeginSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 Subject
+	 */
+	private emitSyncData: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
+	/**
+	 * 데이터 동기화 종료 Subject
+	 */
+	private emitEndSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 시작 Observable
+	 */
+	onBeginConnect: Observable<void> = this.emitBeginConnect.asObservable();
+	/**
+	 * 장치 연결 종료 Observable
+	 */
+	onEndConnect: Observable<void> = this.emitEndConnect.asObservable();
+	/**
+	 * 데이터 동기화 시작 Observable
+	 */
+	onBeginSyncData: Observable<void> = this.emitBeginSyncData.asObservable();
+	/**
+	 * 데이터 동기화 Observable
+	 */
+	onSyncData: Observable<BodyscaleMeasurement[]> = this.emitSyncData.asObservable();
+	/**
+	 * 데이터 동기화 종료 Observable
+	 */
+	onEndSyncData: Observable<void> = this.emitEndSyncData.asObservable();
 
 	/**
 	 * 생성자
@@ -57,27 +92,41 @@ export class CordovaBodyscaleService {
 	}
 
 	/**
+	 * 연결 시작
+	 */
+	beginConnect() {
+		this.emitBeginConnect.next();
+	}
+
+	/**
+	 * 연결 종료
+	 */
+	endConnect() {
+		this.emitEndConnect.next();
+	}
+
+	/**
 	 * 측정 시작
 	 */
-	beginBodyscaleMeasurement() {
-		this.emitBeginBodyscaleMeasurment.next();
+	beginSyncData() {
+		this.emitBeginSyncData.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
-	endBodyscaleMeasurement() {
-		this.emitEndBodyscaleMeasurment.next();
+	endSyncData() {
+		this.emitEndSyncData.next();
 	}
 
 	/**
 	 * 측정 데이터 전달
 	 * @param measurements 측정 데이터
 	 */
-	putBodyscaleMeasurement(measurements: BodyscaleMeasurement | BodyscaleMeasurement[]) {
+	putSyncData(measurements: BodyscaleMeasurement | BodyscaleMeasurement[]) {
 		if (!Array.isArray(measurements)) {
 			measurements = [measurements];
 		}
-		this.emitBodyscaleMeasurment.next(measurements);
+		this.emitSyncData.next(measurements);
 	}
 }

@@ -3,8 +3,9 @@ import {BLE} from '@ionic-native/ble/ngx';
 
 import {Observable, Subject} from 'rxjs';
 import {
+	GlucosemeterMeasurement,
 	PedometerDaySummary,
-	PedometerHeartrateSegment,
+	PedometerHeartrateSegment, PedometerMeasurement,
 	PedometerSleepSegment,
 	PedometerSleepSummary,
 	PedometerTimeSegment
@@ -33,25 +34,46 @@ export const DefaultPedometerUser: PedometerUser = {
 @Injectable()
 export class CordovaPedometerService {
 
-	private emitLogToServer: Subject<string> = new Subject<string>();
-	private emitBeginPedometerMeasurements: Subject<void> = new Subject<void>();
-	private emitPedometerTimeSegment: Subject<PedometerTimeSegment[]> = new Subject<PedometerTimeSegment[]>();
-	private emitPedometerDaySummary: Subject<PedometerDaySummary[]> = new Subject<PedometerDaySummary[]>();
-	private emitPedometerSleepSegment: Subject<PedometerSleepSegment[]> = new Subject<PedometerSleepSegment[]>();
-	private emitPedometerHeartrateSegment: Subject<PedometerHeartrateSegment[]> = new Subject<PedometerHeartrateSegment[]>();
-	private emitPedometerSleepSummary: Subject<PedometerSleepSummary[]> = new Subject<PedometerSleepSummary[]>();
-	private emitSyncDataPostCallback: Subject<void> = new Subject<void>();
-	private emitEndPedometerMeasurements: Subject<void> = new Subject<void>();
-
-	onLogToServer: Observable<string> = this.emitLogToServer.asObservable();
-	onBeginPedometerMeasurements: Observable<void> = this.emitBeginPedometerMeasurements.asObservable();
-	onPedometerTimeSegment: Observable<PedometerTimeSegment[]> = this.emitPedometerTimeSegment.asObservable();
-	onPedometerDaySummary: Observable<PedometerDaySummary[]> = this.emitPedometerDaySummary.asObservable();
-	onPedometerSleepSegment: Observable<PedometerSleepSegment[]> = this.emitPedometerSleepSegment.asObservable();
-	onPedometerHeartrateSegment: Observable<PedometerHeartrateSegment[]> = this.emitPedometerHeartrateSegment.asObservable();
-	onPedometerSleepSummary: Observable<PedometerSleepSummary[]> = this.emitPedometerSleepSummary.asObservable();
-	onSyncDataPostCallback: Observable<void> = this.emitSyncDataPostCallback.asObservable();
-	onEndPedometerMeasurements: Observable<void> = this.emitEndPedometerMeasurements.asObservable();
+	/**
+	 * 장치 연결 시작 Subject
+	 */
+	private emitBeginConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 종료 Subject
+	 */
+	private emitEndConnect: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 시작 Subject
+	 */
+	private emitBeginSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 데이터 동기화 Subject
+	 */
+	private emitSyncData: Subject<PedometerMeasurement[]> = new Subject<PedometerMeasurement[]>();
+	/**
+	 * 데이터 동기화 종료 Subject
+	 */
+	private emitEndSyncData: Subject<void> = new Subject<void>();
+	/**
+	 * 장치 연결 시작 Observable
+	 */
+	onBeginConnect: Observable<void> = this.emitBeginConnect.asObservable();
+	/**
+	 * 장치 연결 종료 Observable
+	 */
+	onEndConnect: Observable<void> = this.emitEndConnect.asObservable();
+	/**
+	 * 데이터 동기화 시작 Observable
+	 */
+	onBeginSyncData: Observable<void> = this.emitBeginSyncData.asObservable();
+	/**
+	 * 데이터 동기화 Observable
+	 */
+	onSyncData: Observable<PedometerMeasurement[]> = this.emitSyncData.asObservable();
+	/**
+	 * 데이터 동기화 종료 Observable
+	 */
+	onEndSyncData: Observable<void> = this.emitEndSyncData.asObservable();
 
 	/**
 	 * 생성자
@@ -84,44 +106,42 @@ export class CordovaPedometerService {
 	}
 
 	/**
+	 * 연결 시작
+	 */
+	beginConnect() {
+		this.emitBeginConnect.next();
+	}
+
+	/**
+	 * 연결 종료
+	 */
+	endConnect() {
+		this.emitEndConnect.next();
+	}
+
+	/**
 	 * 측정 시작
 	 */
-	beginPedometerMeasurements() {
-		this.emitBeginPedometerMeasurements.next();
+	beginSyncData() {
+		this.emitBeginSyncData.next();
 	}
 
 	/**
 	 * 측정 종료
 	 */
-	endPedometerMeasurements() {
-		this.emitEndPedometerMeasurements.next();
+	endSyncData() {
+		this.emitEndSyncData.next();
 	}
 
-	public putLogToServer(log: string) {
-		this.emitLogToServer.next(log);
+	/**
+	 * 측정 데이터 전달
+	 * @param measurements 측정 데이터
+	 */
+	public putSyncData(measurements: PedometerMeasurement | PedometerMeasurement[]) {
+		if (!Array.isArray(measurements)) {
+			measurements = [measurements];
+		}
+		this.emitSyncData.next(measurements);
 	}
 
-	public putPedometerTimeSegments(data: PedometerTimeSegment | PedometerTimeSegment[]) {
-		this.emitPedometerTimeSegment.next(this.arraytize(data));
-	}
-
-	public putPedometerDaySummary(data: PedometerDaySummary | PedometerDaySummary[]) {
-		this.emitPedometerDaySummary.next(this.arraytize(data));
-	}
-
-	public putPedometerSleepSegment(data: PedometerSleepSegment | PedometerSleepSegment[]) {
-		this.emitPedometerSleepSegment.next(this.arraytize(data));
-	}
-
-	public putPedometerHeartrateSegment(data: PedometerHeartrateSegment | PedometerHeartrateSegment[]) {
-		this.emitPedometerHeartrateSegment.next(this.arraytize(data));
-	}
-
-	public putPedometerSleepSummary(data: PedometerSleepSummary | PedometerSleepSummary[]) {
-		this.emitPedometerSleepSummary.next(this.arraytize(data));
-	}
-
-	public putSyncDataPostCallback() {
-		this.emitSyncDataPostCallback.next();
-	}
 }
