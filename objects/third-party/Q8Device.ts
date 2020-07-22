@@ -231,7 +231,10 @@ export class Q8Device extends PedometerDeviceBase {
 
 
 	private handle_notified_l2(packet: L2Packet) {
-		// console.log(1, 'Recieved packet value : ', packet.value);
+
+		console.log(1, 'pedometer recieved packet value : ', packet.value);
+
+		// this.service.beginSyncData(this);
 
 		if (packet.cmdid === 3) {
 			if (packet.keyid === 2 || packet.keyid === 4) {

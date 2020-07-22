@@ -383,7 +383,7 @@ export class DeviceInfoProvider {
 		if (existDevices.length > 0) {
 
 			// ios인 경우
-			if (Device.platform.toLowerCase() === "ios") {
+			if (Device.platform && Device.platform.toLowerCase() === "ios") {
 				//const identifiers = await this.ble.peripheralsWithIdentifiers([device.id]);
 			}
 

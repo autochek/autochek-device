@@ -7,7 +7,9 @@ const UUID_SERVICE = '1810';
 const UUID_CHAR_NOTIFY = '2a35';
 const UUID_CHAR_READ = '2a49';
 
-
+/**
+ * 혈압계 장치 클래스
+ */
 export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
 	constructor(protected service: CordovaBpmeterService, id: string, name: string, extra?: object) {
 		super(service.ble, id, name, extra)

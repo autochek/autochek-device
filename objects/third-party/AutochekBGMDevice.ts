@@ -58,12 +58,17 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 	}
 
 	async sync_callback(): Promise<boolean> {
+
+		this.service.beginSyncData(this);
+
 		const res = await this.getRecordFull();
 
 		if (res) {
 			this.service.putSyncData(this.glucosemeterMeasurements);
 			this.glucosemeterMeasurements = [];
 		}
+
+		this.service.endSyncData(this);
 
 		return res;
 	}
