@@ -93,7 +93,7 @@ export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
 				// console.log('notification result', buffer);
 
 				// 동기화 시작
-				this.service.beginSyncData();
+				this.service.beginSyncData(this);
 
 				console.log('packet noticiation recieved from bpmeter', bufferToHex(buffer));
 				const ub = new Uint8Array(buffer);
@@ -120,7 +120,7 @@ export class AutochekSignatureBpmeter extends BloodpressureDeviceBase {
 				this.service.putSyncData(data);
 
 				// 동기화 종료
-				this.service.endSyncData();
+				this.service.endSyncData(this);
 			});
 	}
 }

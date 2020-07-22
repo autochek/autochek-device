@@ -58,15 +58,16 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 				if (status === 0) {
 
-					// 알람 중지
-					this.stopNotification(UUID_SERVICE, UUID_CHAR_NOTIFY);
-
 					// 동기화 시작
-					this.service.beginSyncData();
+					this.service.beginSyncData(this);
 
 					// this.bodyscaleDataProvider.refreshBodyscaleRealtime(packet);
 
 					if (fixed) {
+
+						// 알람 중지
+						this.stopNotification(UUID_SERVICE, UUID_CHAR_NOTIFY);
+
 						status = 1;
 
 						if (hasBmiValue(buffer)) {
@@ -90,10 +91,7 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 						}
 
 						// 동기화 종료
-						this.service.endSyncData();
-
-						// 장치 연결 해제
-						await this.ble.disconnect(this.id);
+						this.service.endSyncData(this);
 					}
 				}
 

@@ -10,6 +10,7 @@ import {
 	PedometerSleepSummary,
 	PedometerTimeSegment
 } from 'autochek-base/objects/device-data-object';
+import {DeviceBase} from "autochek-device/objects/base/DeviceBase";
 
 
 export interface PedometerUser {
@@ -45,7 +46,7 @@ export class CordovaPedometerService {
 	/**
 	 * 데이터 동기화 시작 Subject
 	 */
-	private emitBeginSyncData: Subject<void> = new Subject<void>();
+	private emitBeginSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 데이터 동기화 Subject
 	 */
@@ -53,7 +54,7 @@ export class CordovaPedometerService {
 	/**
 	 * 데이터 동기화 종료 Subject
 	 */
-	private emitEndSyncData: Subject<void> = new Subject<void>();
+	private emitEndSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 장치 연결 시작 Observable
 	 */
@@ -65,7 +66,7 @@ export class CordovaPedometerService {
 	/**
 	 * 데이터 동기화 시작 Observable
 	 */
-	onBeginSyncData: Observable<void> = this.emitBeginSyncData.asObservable();
+	onBeginSyncData: Observable<DeviceBase> = this.emitBeginSyncData.asObservable();
 	/**
 	 * 데이터 동기화 Observable
 	 */
@@ -73,7 +74,7 @@ export class CordovaPedometerService {
 	/**
 	 * 데이터 동기화 종료 Observable
 	 */
-	onEndSyncData: Observable<void> = this.emitEndSyncData.asObservable();
+	onEndSyncData: Observable<DeviceBase> = this.emitEndSyncData.asObservable();
 
 	/**
 	 * 생성자
@@ -121,16 +122,18 @@ export class CordovaPedometerService {
 
 	/**
 	 * 측정 시작
+	 * @param device
 	 */
-	beginSyncData() {
-		this.emitBeginSyncData.next();
+	beginSyncData(device: DeviceBase) {
+		this.emitBeginSyncData.next(device);
 	}
 
 	/**
 	 * 측정 종료
+	 * @param device
 	 */
-	endSyncData() {
-		this.emitEndSyncData.next();
+	endSyncData(device: DeviceBase) {
+		this.emitEndSyncData.next(device);
 	}
 
 	/**
