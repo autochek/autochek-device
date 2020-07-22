@@ -52,7 +52,11 @@ export class Q8Device extends PedometerDeviceBase {
 	connectionPromiseResponse: (value: boolean) => void = null;
 	syncPromiseResponse: (value: boolean) => void = null;
 
-	static scanCallback(devicename: string): boolean {
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
 		return devicename.includes('HC92');
 	}
 

@@ -18,7 +18,11 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 		this.className = 'ChipseaScaleDevice';
 	}
 
-	static scanCallback(devicename: string): boolean {
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
 		return devicename.includes('Chipsea');
 	}
 
@@ -45,7 +49,7 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 		// 알람 시작
 		this.startNotification(UUID_SERVICE, UUID_CHAR_NOTIFY).subscribe(
-			(buffer) => {
+			async (buffer) => {
 
 				const packet: BodyscaleMeasurement = parsePacket(buffer);
 				const fixed: boolean = isFixed(buffer);
@@ -53,6 +57,9 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 				// console.log(bufferToHex(buffer), `fixed?:${fixed}`);
 
 				if (status === 0) {
+
+					// 알람 중지
+					this.stopNotification(UUID_SERVICE, UUID_CHAR_NOTIFY);
 
 					// 동기화 시작
 					this.service.beginSyncData();
@@ -84,6 +91,9 @@ export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 						// 동기화 종료
 						this.service.endSyncData();
+
+						// 장치 연결 해제
+						await this.ble.disconnect(this.id);
 					}
 				}
 

@@ -140,7 +140,7 @@ export class DeviceInfoProvider {
 		console.log("DeviceInfoProvider.startScan : ", devicetype);
 
 		this.scanObservable = new Subject<DeviceBase>();
-		let devicelist: any;
+		let devices: any[];
 
 		// let deviceService: any;
 
@@ -157,10 +157,10 @@ export class DeviceInfoProvider {
 		//   throw new Error(`No designated device type ${devicetype}`);
 		// }
 
-		devicelist = deviceList[devicetype];
+		devices = deviceList[devicetype];
 
 		// 검색된 장치 목록
-		const foundDevice = new Set<string>();
+		const foundDeviceIds = new Set<string>();
 
 		// 장치 검색 시작
 		this.ble.startScan([])
@@ -169,17 +169,20 @@ export class DeviceInfoProvider {
 					// console.log('scan data', data);
 
 					// 이미 검색된 장치가 아닌 경우
-					if (!foundDevice.has(data.id)) {
+					if (!foundDeviceIds.has(data.id)) {
 						// 장치명이 문자열인 경우
 						if (data.name && typeof (data.name) === 'string') {
 
-							for (const dc of devicelist) {
-								if (dc.scanCallback(data.name)) {
-									const device = new dc(this.cordovaServices[devicetype], data.id, data.name);
-									// device.name = data.name;
-									// device.id = data.id;
-									foundDevice.add(data.id);
-									this.scanObservable.next(device);
+							// 모든 장치에 대해서 처리
+							for (const device of devices) {
+								// 해당 이름의 장치가 검색된 경우
+								if (device.nameContiains(data.name)) {
+									// 해당 타입의 장치 정보를 생성한다.
+									const deviceInfo = new device(this.cordovaServices[devicetype], data.id, data.name);
+									// 찾은 기기 아이디에 추가
+									foundDeviceIds.add(data.id);
+									// 찾은 장치에 대해 알림
+									this.scanObservable.next(deviceInfo);
 								}
 							}
 						}

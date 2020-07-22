@@ -20,15 +20,18 @@ const UUID_CHAR_WRITE = 'ffe3';
 
 export class QnScaleDevice extends BodyscaleDeviceBase {
 
-	static scanCallback(devicename: string): boolean {
-		return devicename.includes('QN-Scale');
-	}
-
 	constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
 		super(service.ble, id, name, extra);
 		this.className = 'QnScaleDevice';
 	}
 
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
+		return devicename.includes('QN-Scale');
+	}
 
 	async first_connect_callback(): Promise<boolean> {
 		this.general_connect_callback();

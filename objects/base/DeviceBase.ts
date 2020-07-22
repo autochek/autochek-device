@@ -55,7 +55,31 @@ export abstract class DeviceBase {
 	public staticStatusSubject: ReplaySubject<EnumDeviceStaticStatus> = new ReplaySubject<EnumDeviceStaticStatus>(1);
 	public dynamicStatusSubject: ReplaySubject<EnumDeviceDynamicStatus> = new ReplaySubject<EnumDeviceDynamicStatus>(1);
 
-	static scanCallback(devicename: string): boolean {
+	/**
+	 * 생성자
+	 * @param ble 저전력 bluetooth 장치 객체
+	 * @param id 장치 아이디
+	 * @param name 장치명
+	 * @param extra 확장 데이터 객체
+	 */
+	constructor(ble: BLE, id: string, name: string, extra?: object) {
+		this.ble = ble;
+		this.id = id;
+		this.name = name;
+		this.extra = extra;
+
+		this.progress = new Subject<string>();
+
+		this.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
+		this.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
+
+	}
+
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
 		return false;
 	}
 
@@ -80,21 +104,6 @@ export abstract class DeviceBase {
 	}
 
 
-	constructor(ble: BLE, id: string, name: string, extra?: object) {
-		this.ble = ble;
-		this.id = id;
-		this.name = name;
-		this.extra = extra;
-
-
-		this.progress = new Subject<string>();
-
-		this.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
-		this.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
-
-	}
-
-
 	toJSON() {
 		return {
 			className: this.className,
@@ -108,7 +117,7 @@ export abstract class DeviceBase {
 			// setAutoConnection: this.setAutoConnection,
 
 			jsonConcat: (o2) => {
-				for (const key in o2) {
+				for (const key of Object.keys(o2)) {
 					this[key] = o2[key];
 				}
 				return this;
