@@ -2,7 +2,7 @@ import {DeviceBase} from './DeviceBase';
 
 import {BLE} from '@ionic-native/ble/ngx';
 
-export class GlucosemeterDeviceBase extends DeviceBase {
+export abstract class GlucosemeterDeviceBase extends DeviceBase {
 
 	type: string = 'glucosemeter';
 

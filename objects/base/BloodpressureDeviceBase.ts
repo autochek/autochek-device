@@ -3,7 +3,7 @@ import {DeviceBase} from './DeviceBase';
 import {BLE} from '@ionic-native/ble/ngx';
 
 
-export class BloodpressureDeviceBase extends DeviceBase {
+export abstract class BloodpressureDeviceBase extends DeviceBase {
 
 	type: string = 'bpmeter';
 

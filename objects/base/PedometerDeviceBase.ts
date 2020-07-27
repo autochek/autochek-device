@@ -3,7 +3,7 @@ import {DeviceBase} from './DeviceBase';
 import {BLE} from '@ionic-native/ble/ngx';
 
 
-export class PedometerDeviceBase extends DeviceBase {
+export abstract class PedometerDeviceBase extends DeviceBase {
 
 	type: string = 'pedometer'
 
