@@ -105,6 +105,7 @@ export abstract class DeviceBase {
 		this.id = id;
 		this.name = name;
 		this.extra = extra;
+		this.isScanned = false;
 
 		this.progress = new Subject<string>();
 
