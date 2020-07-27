@@ -3,7 +3,7 @@ import {DeviceBase} from './DeviceBase';
 import {BLE} from '@ionic-native/ble/ngx';
 
 
-export abstract class BodyscaleDeviceBase extends DeviceBase {
+export class BodyscaleDeviceBase extends DeviceBase {
 
 	type: string = 'bodyscale';
 
