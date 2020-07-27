@@ -26,7 +26,7 @@ export interface DeviceBase {
 	 */
 	type: string;
 	/**
-	 * 아이디
+	 * 장치 아이디
 	 */
 	id: string;
 	/**
@@ -34,7 +34,7 @@ export interface DeviceBase {
 	 */
 	name: string;
 	/**
-	 * 클래스명
+	 * 장치 클래스명
 	 */
 	className: string;
 	/**
@@ -42,7 +42,7 @@ export interface DeviceBase {
 	 */
 	extra: object;
 	/**
-	 * 스캔되었는지 여부
+	 * 검색되었는지 여부
 	 */
 	isScanned: boolean;
 
@@ -56,7 +56,7 @@ export abstract class DeviceBase {
 	 */
 	type: string = 'devicebase';
 	/**
-	 * 아이디
+	 * 장치 아이디
 	 */
 	id: string;
 	/**
@@ -64,7 +64,7 @@ export abstract class DeviceBase {
 	 */
 	name: string;
 	/**
-	 * 클래스명
+	 * 장치 클래스명
 	 */
 	className: string = 'DeviceBase';
 	/**
@@ -72,7 +72,7 @@ export abstract class DeviceBase {
 	 */
 	extra: object;
 	/**
-	 * 스캔되었는지 여부
+	 * 검색되었는지 여부
 	 */
 	isScanned: boolean = false;
 

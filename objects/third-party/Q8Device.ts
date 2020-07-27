@@ -61,7 +61,7 @@ export class Q8Device extends PedometerDeviceBase {
 	}
 
 	constructor(protected service: CordovaPedometerService, id: string, name: string, extra?: object) {
-		super(service?.ble, id, name, extra);
+		super(service.ble, id, name, extra);
 		this.className = 'Q8Device';
 
 
