@@ -21,7 +21,7 @@ const UUID_CHAR_WRITE = 'ffe3';
 export class QnScaleDevice extends BodyscaleDeviceBase {
 
 	constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
-		super(service.ble, id, name, extra);
+		super(service?.ble, id, name, extra);
 		this.className = 'QnScaleDevice';
 	}
 

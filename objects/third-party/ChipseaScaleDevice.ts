@@ -14,7 +14,7 @@ const UUID_CHAR_WRITE = 'fff2';
 export class ChipseaScaleDevice extends BodyscaleDeviceBase {
 
 	constructor(protected service: CordovaBodyscaleService, id: string, name: string, extra?: object) {
-		super(service.ble, id, name, extra);
+		super(service?.ble, id, name, extra);
 		this.className = 'ChipseaScaleDevice';
 	}
 
