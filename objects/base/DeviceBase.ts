@@ -21,22 +21,60 @@ export interface DeviceBaseConfig {
 }
 
 export interface DeviceBase {
-	className: string;
+	/**
+	 * 장치 타입
+	 */
 	type: string;
+	/**
+	 * 아이디
+	 */
 	id: string;
+	/**
+	 * 장치명
+	 */
 	name: string;
+	/**
+	 * 클래스명
+	 */
+	className: string;
+	/**
+	 * 부가 데이터
+	 */
 	extra: object;
+	/**
+	 * 스캔되었는지 여부
+	 */
+	isScanned: boolean;
 
 	config: DeviceBaseConfig;
 
 }
 
 export abstract class DeviceBase {
+	/**
+	 * 장치 타입
+	 */
 	type: string = 'devicebase';
+	/**
+	 * 아이디
+	 */
 	id: string;
+	/**
+	 * 장치명
+	 */
 	name: string;
+	/**
+	 * 클래스명
+	 */
 	className: string = 'DeviceBase';
+	/**
+	 * 부가 데이터
+	 */
 	extra: object;
+	/**
+	 * 스캔되었는지 여부
+	 */
+	isScanned: boolean = false;
 
 	config: DeviceBaseConfig = {
 		noConnectionOnBond: false,
