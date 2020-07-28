@@ -45,6 +45,10 @@ export interface DeviceBase {
 	 * 검색되었는지 여부
 	 */
 	isScanned: boolean;
+	/**
+	 * 검색 유효 만료 시간
+	 */
+	scanValidEnd: Date;
 
 	config: DeviceBaseConfig;
 
@@ -75,6 +79,10 @@ export abstract class DeviceBase {
 	 * 검색되었는지 여부
 	 */
 	isScanned: boolean = false;
+	/**
+	 * 검색 유효 만료 시간
+	 */
+	scanValidEnd: Date;
 
 	config: DeviceBaseConfig = {
 		noConnectionOnBond: false,
@@ -106,6 +114,7 @@ export abstract class DeviceBase {
 		this.name = name;
 		this.extra = extra;
 		this.isScanned = false;
+		this.scanValidEnd = new Date();
 
 		this.progress = new Subject<string>();
 
