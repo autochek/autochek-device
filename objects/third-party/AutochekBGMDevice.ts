@@ -22,21 +22,6 @@ const UUID_CHARACTERISTIC_CUSTOM = 'FFF1';
 export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 	private glucosemeterMeasurements: GlucosemeterMeasurement[] = [];
 
-	/**
-	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
-	 * @param devicename 장치명에 포함될 기기명
-	 */
-	static nameContiains(devicename: string): boolean {
-		return devicename.includes('Auto-Chek');
-	}
-
-
-	// connection_success = ()=>{};
-	syncdateSuccess = (br: boolean) => {
-	}
-	getrecordSuccess = (br: boolean) => {
-	}
-
 	constructor(protected service: CordovaGlucosemeterService, id: string, name: string, extra?: object) {
 		super(service.ble, id, name, extra);
 		this.className = 'AutochekBGMDevice';
@@ -45,6 +30,20 @@ export class AutochekBGMDevice extends GlucosemeterDeviceBase {
 
 	}
 
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
+		return devicename.includes('Auto-Chek');
+	}
+
+	// connection_success = ()=>{};
+	syncdateSuccess = (br: boolean) => {
+	}
+
+	getrecordSuccess = (br: boolean) => {
+	}
 
 	async first_connect_callback(): Promise<boolean> {
 		await this.general_connect_precallback();
@@ -234,7 +233,7 @@ function parseDate(dtstr: string): Date {
 	result.setHours(hour);
 	result.setMinutes(minute);
 	result.setSeconds(second);
-	
+
 	return result;
 }
 

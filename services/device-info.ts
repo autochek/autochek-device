@@ -212,113 +212,6 @@ export class DeviceInfoProvider {
 		this.ble.stopScan();
 	}
 
-
-	/**
-	 * 장치 삭제
-	 * @param device 삭제할 장치 정보
-	 */
-	private removeDevice(device: DeviceBase) {
-
-		console.log('DeviceInfoProvider.removeDevice', device);
-
-		// 연결된 장치 목록이 존재하지 않는 경우
-		if (!this.connectedDevices)
-			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
-
-		// 삭제하려는 장비를 제외한 장치 목록을 저장한다.
-		this.connectedDevices[device.type] = this.connectedDevices[device.type].filter((db) => db.id !== device.id);
-		// 연결된 장치 목록 변경 알람
-		this.connectedDevicesObservable.next(this.connectedDevices);
-		// 삭제한 후의 연결된 장치 목록 저장
-		this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices));
-	}
-
-	/**
-	 * 장치 추가
-	 * @param device 추가할 장치 정보
-	 */
-	private addDevice(device: DeviceBase) {
-
-		console.log('DeviceInfoProvider.addDevice : ', this.connectedDevices, device);
-
-		// 연결된 장치 목록이 존재하지 않는 경우
-		if (!this.connectedDevices)
-			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
-
-		// 해당 타입에 장비를 추가한다.
-		this.connectedDevices[device.type].push(device);
-		// 연결된 장치 목록 변경 알람
-		this.connectedDevicesObservable.next(this.connectedDevices);
-		// 연결된 장치 목록 저장
-		this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices));
-	}
-
-	/**
-	 * 연결된 장치 목록 초기화
-	 */
-	private async initConnectedDevices() {
-
-		console.log('DeviceInfoProvider.initConnectedDevices');
-
-		let storageData: StorageData;
-
-		try {
-			// 연결된 장비 목록 저장소를 가져온다.
-			storageData = await this.storage.getItem(STORAGE_TAG_CONNECTED_DEVICE);
-
-			console.log('retrieved storage data', storageData);
-		} catch (error) {
-			// 연결된 장비 목록 저장소가 초기화 되어 있지 않은 경우
-			if (error.code === 2) {
-				// 연결된 장치 목록 초기화 값을 저장
-				this.connectedDevices = Object.assign({}, defaultConnectedDevice);
-				// 연결된 장치 목록 변경 알람
-				this.connectedDevicesObservable.next(this.connectedDevices);
-				return;
-			}
-			// 그 외 에러
-			else {
-				console.error('initConnectedDevices failed. unknown error ', error);
-				return;
-			}
-		}
-
-		// 연결된 장비 목록 저장소가 유효한 경우
-		if (storageData) {
-			// 연결된 장비 목록 객체를 가져온다.
-			this.connectedDevices = this.deserializer(storageData);
-			// 연결된 장치 목록 변경 알람
-			this.connectedDevicesObservable.next(this.connectedDevices);
-		}
-
-		return;
-
-	}
-
-	/**
-	 * 모든 장치를 자동 연결 한다.
-	 */
-	private autoConnectAll() {
-
-		console.log('DeviceInfoProvider.autoConnectAll');
-
-		// 연결된 장치 목록이 존재하지 않는 경우
-		if (!this.connectedDevices)
-			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
-
-		// 모든 장치 타입에 대해서 처리
-		for (const devicetype of devicetypeList) {
-			// 해당 타입의 모든 장치에 대해서 처리
-			for (const device of this.connectedDevices[devicetype]) {
-
-				// 해당 장치가 자동 연결로 설정되어 있는 경우, 자동 연결 처리
-				if ((device as DeviceBase).config.setAutoConnection) {
-					this.autoConnect(device);
-				}
-			}
-		}
-	}
-
 	/**
 	 * 장비 등록
 	 * @param device 등록할 장비 정보
@@ -442,22 +335,6 @@ export class DeviceInfoProvider {
 	}
 
 	/**
-	 * 등록된 장치인지 여부를 가져온다.
-	 * @param device 확인할 장치 정보
-	 */
-	private isDeviceBonded(device: DeviceBase) {
-
-		console.log('DeviceInfoProvider.isDeviceBonded', device);
-
-		// 연결된 장치 목록이 존재하지 않는 경우
-		if (!this.connectedDevices)
-			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
-
-		// 연결된 기기 목록 중에 해당 기기 타입의 기기 중에 해당 아이디의 기기가 존재하는지 여부를 반환한다.
-		return this.connectedDevices[device.type].filter((d: DeviceBase) => d.id === device.id).length > 0;
-	}
-
-	/**
 	 * 주어진 장치 아이디에 해당하는 장치 정보를 반환한다.
 	 * @param deviceId 장치 아이디
 	 */
@@ -478,41 +355,6 @@ export class DeviceInfoProvider {
 	}
 
 	/**
-	 * 장치 연결 콜백 함수
-	 * @param device 연결할 장치 정보
-	 * @param isFirst 첫 연결인지 여부
-	 */
-	private async connect_promise(device: DeviceBase, isFirst: boolean = false): Promise<boolean> {
-
-		console.log('DeviceInfoProvider.connect_promise', device, isFirst);
-
-		return new Promise<boolean>((res/*, rej*/) => {
-			// 장치 연결
-			this.ble.connect(device.id)
-				.subscribe(
-					// 연결 성공
-					async (/*peripheral*/) => {
-
-						// console.log('connect ble callback', peripheral);
-
-						// 일반 연결 콜백 함수 호출
-						res(await this.generalConnectPostCallback(device, isFirst));
-					},
-					// 연결 에러 (연결해제 콜백)
-					async (/*peripheral*/) => {
-
-						console.log('disconnect callback from connect_promise');
-
-						// 연결해제 상태로 저장
-						device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
-
-						res(false);
-					}
-				);
-		})
-	}
-
-	/**
 	 * 일반 연결 콜백 함수
 	 * @param device 연결할 장치 정보
 	 * @param isFirst 첫 연결인지 여부
@@ -527,57 +369,6 @@ export class DeviceInfoProvider {
 		// 연결 성공 이고, 연결 후 자동 싱크인 경우
 		if (result && device.config.autoSyncAfterConnection) {
 			this.syncDevice(device);
-		}
-
-		return result;
-	}
-
-	/**
-	 * 연결 콜백 함수
-	 * @param device 해당 장치 정보
-	 * @param isFirst 첫번째 연결인지 여부
-	 */
-	private async connect_callback(device: DeviceBase, isFirst: boolean): Promise<boolean> {
-
-		console.log('DeviceInfoProvider.connect_callback', device, isFirst);
-
-		let result: boolean = false;
-
-		// 연결이 유휴 상태가 아닌 경우
-		if (!device.isInDynamicStatus(EnumDeviceDynamicStatus.Idle)) {
-
-			console.log(`You cannot connect device. Device dynamic status is not Idle`);
-
-		}
-		// 연결이 유휴 상태인 경우
-		else {
-			// 연결 중 상태로 변경
-			device.setDynamicStatus(EnumDeviceDynamicStatus.Connecting);
-
-			// this.connectedDevicesObservable.next(this.connectedDevices);
-			// 첫 연결인 경우
-			if (isFirst) {
-				// 첫번째 연결 콜백 호출
-				result = await device.first_connect_callback();
-			}
-			// 첫 연결이 아닌 경우
-			else {
-				// 반복 연결 콜백 호출
-				result = await device.repeated_connect_callback();
-			}
-			// 유휴 상태로 설정
-			device.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
-
-			// 연결이 실패인 경우
-			if (!result) {
-				// 장치 연결 해제
-				await this.ble.disconnect(device.id);
-			}
-			// 연결이 성공인 경우
-			else {
-				// 연결됨 상태로 설정
-				device.setStaticStatus(EnumDeviceStaticStatus.Connected);
-			}
 		}
 
 		return result;
@@ -675,6 +466,214 @@ export class DeviceInfoProvider {
 
 		// 장치 등록 해제
 		this.removeDevice(device);
+	}
+
+	/**
+	 * 장치 삭제
+	 * @param device 삭제할 장치 정보
+	 */
+	private removeDevice(device: DeviceBase) {
+
+		console.log('DeviceInfoProvider.removeDevice', device);
+
+		// 연결된 장치 목록이 존재하지 않는 경우
+		if (!this.connectedDevices)
+			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
+
+		// 삭제하려는 장비를 제외한 장치 목록을 저장한다.
+		this.connectedDevices[device.type] = this.connectedDevices[device.type].filter((db) => db.id !== device.id);
+		// 연결된 장치 목록 변경 알람
+		this.connectedDevicesObservable.next(this.connectedDevices);
+		// 삭제한 후의 연결된 장치 목록 저장
+		this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices));
+	}
+
+	/**
+	 * 장치 추가
+	 * @param device 추가할 장치 정보
+	 */
+	private addDevice(device: DeviceBase) {
+
+		console.log('DeviceInfoProvider.addDevice : ', this.connectedDevices, device);
+
+		// 연결된 장치 목록이 존재하지 않는 경우
+		if (!this.connectedDevices)
+			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
+
+		// 해당 타입에 장비를 추가한다.
+		this.connectedDevices[device.type].push(device);
+		// 연결된 장치 목록 변경 알람
+		this.connectedDevicesObservable.next(this.connectedDevices);
+		// 연결된 장치 목록 저장
+		this.storage.setItem(STORAGE_TAG_CONNECTED_DEVICE, this.serializer(this.connectedDevices));
+	}
+
+	/**
+	 * 연결된 장치 목록 초기화
+	 */
+	private async initConnectedDevices() {
+
+		console.log('DeviceInfoProvider.initConnectedDevices');
+
+		let storageData: StorageData;
+
+		try {
+			// 연결된 장비 목록 저장소를 가져온다.
+			storageData = await this.storage.getItem(STORAGE_TAG_CONNECTED_DEVICE);
+
+			console.log('retrieved storage data', storageData);
+		} catch (error) {
+			// 연결된 장비 목록 저장소가 초기화 되어 있지 않은 경우
+			if (error.code === 2) {
+				// 연결된 장치 목록 초기화 값을 저장
+				this.connectedDevices = Object.assign({}, defaultConnectedDevice);
+				// 연결된 장치 목록 변경 알람
+				this.connectedDevicesObservable.next(this.connectedDevices);
+				return;
+			}
+			// 그 외 에러
+			else {
+				console.error('initConnectedDevices failed. unknown error ', error);
+				return;
+			}
+		}
+
+		// 연결된 장비 목록 저장소가 유효한 경우
+		if (storageData) {
+			// 연결된 장비 목록 객체를 가져온다.
+			this.connectedDevices = this.deserializer(storageData);
+			// 연결된 장치 목록 변경 알람
+			this.connectedDevicesObservable.next(this.connectedDevices);
+		}
+
+		return;
+
+	}
+
+	/**
+	 * 모든 장치를 자동 연결 한다.
+	 */
+	private autoConnectAll() {
+
+		console.log('DeviceInfoProvider.autoConnectAll');
+
+		// 연결된 장치 목록이 존재하지 않는 경우
+		if (!this.connectedDevices)
+			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
+
+		// 모든 장치 타입에 대해서 처리
+		for (const devicetype of devicetypeList) {
+			// 해당 타입의 모든 장치에 대해서 처리
+			for (const device of this.connectedDevices[devicetype]) {
+
+				// 해당 장치가 자동 연결로 설정되어 있는 경우, 자동 연결 처리
+				if ((device as DeviceBase).config.setAutoConnection) {
+					this.autoConnect(device);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 등록된 장치인지 여부를 가져온다.
+	 * @param device 확인할 장치 정보
+	 */
+	private isDeviceBonded(device: DeviceBase) {
+
+		console.log('DeviceInfoProvider.isDeviceBonded', device);
+
+		// 연결된 장치 목록이 존재하지 않는 경우
+		if (!this.connectedDevices)
+			this.connectedDevices = Object.assign({}, defaultConnectedDevice);
+
+		// 연결된 기기 목록 중에 해당 기기 타입의 기기 중에 해당 아이디의 기기가 존재하는지 여부를 반환한다.
+		return this.connectedDevices[device.type].filter((d: DeviceBase) => d.id === device.id).length > 0;
+	}
+
+	/**
+	 * 장치 연결 콜백 함수
+	 * @param device 연결할 장치 정보
+	 * @param isFirst 첫 연결인지 여부
+	 */
+	private async connect_promise(device: DeviceBase, isFirst: boolean = false): Promise<boolean> {
+
+		console.log('DeviceInfoProvider.connect_promise', device, isFirst);
+
+		return new Promise<boolean>((res/*, rej*/) => {
+			// 장치 연결
+			this.ble.connect(device.id)
+				.subscribe(
+					// 연결 성공
+					async (/*peripheral*/) => {
+
+						// console.log('connect ble callback', peripheral);
+
+						// 일반 연결 콜백 함수 호출
+						res(await this.generalConnectPostCallback(device, isFirst));
+					},
+					// 연결 에러 (연결해제 콜백)
+					async (/*peripheral*/) => {
+
+						console.log('disconnect callback from connect_promise');
+
+						// 연결해제 상태로 저장
+						device.setStaticStatus(EnumDeviceStaticStatus.NotConnected);
+
+						res(false);
+					}
+				);
+		})
+	}
+
+	/**
+	 * 연결 콜백 함수
+	 * @param device 해당 장치 정보
+	 * @param isFirst 첫번째 연결인지 여부
+	 */
+	private async connect_callback(device: DeviceBase, isFirst: boolean): Promise<boolean> {
+
+		console.log('DeviceInfoProvider.connect_callback', device, isFirst);
+
+		let result: boolean = false;
+
+		// 연결이 유휴 상태가 아닌 경우
+		if (!device.isInDynamicStatus(EnumDeviceDynamicStatus.Idle)) {
+
+			console.log(`You cannot connect device. Device dynamic status is not Idle`);
+
+		}
+		// 연결이 유휴 상태인 경우
+		else {
+			// 연결 중 상태로 변경
+			device.setDynamicStatus(EnumDeviceDynamicStatus.Connecting);
+
+			// this.connectedDevicesObservable.next(this.connectedDevices);
+			// 첫 연결인 경우
+			if (isFirst) {
+				// 첫번째 연결 콜백 호출
+				result = await device.first_connect_callback();
+			}
+			// 첫 연결이 아닌 경우
+			else {
+				// 반복 연결 콜백 호출
+				result = await device.repeated_connect_callback();
+			}
+			// 유휴 상태로 설정
+			device.setDynamicStatus(EnumDeviceDynamicStatus.Idle);
+
+			// 연결이 실패인 경우
+			if (!result) {
+				// 장치 연결 해제
+				await this.ble.disconnect(device.id);
+			}
+			// 연결이 성공인 경우
+			else {
+				// 연결됨 상태로 설정
+				device.setStaticStatus(EnumDeviceStaticStatus.Connected);
+			}
+		}
+
+		return result;
 	}
 
 	/**

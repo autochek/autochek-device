@@ -3,7 +3,6 @@ import {Buffer} from 'buffer';
 import {CordovaBodyscaleService} from 'autochek-device/services/cordova-bodyscale.service';
 import {BodyscaleDeviceBase} from '../base/BodyscaleDeviceBase';
 import {BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
-import {Observable, Subject} from "rxjs";
 
 
 const UUID_SERVICE = 'fff0';

@@ -3,8 +3,12 @@ import {Subject} from 'rxjs';
 import {PedometerDeviceBase} from '../base/PedometerDeviceBase';
 import * as moment from 'moment';
 import {
-	PedometerDaySummary, PedometerTimeSegment, PedometerSleepSummary, PedometerSleepSegment,
-	PedometerHeartrateSegment, PedometerMeasurement
+	PedometerDaySummary,
+	PedometerHeartrateSegment,
+	PedometerMeasurement,
+	PedometerSleepSegment,
+	PedometerSleepSummary,
+	PedometerTimeSegment
 } from 'autochek-base/objects/device-data-object';
 import {CordovaPedometerService} from 'autochek-device/services/cordova-pedometer.service';
 
@@ -22,43 +26,25 @@ const timeout = 30000;
 export class Q8Device extends PedometerDeviceBase {
 
 
+	connectionPromiseResponse: (value: boolean) => void = null;
+	syncPromiseResponse: (value: boolean) => void = null;
 	private comL1Queue: L1Packet[];
 	private comAcker: Subject<any>;
 	private comIsAcked: number;
-
 	private logLevel: number = 2;
-
-
 	private connectionPhase = 0;
-
 	private historyDataRequestList: string[] = ['01', '02', '04', '0a', '0b', '03', '10'];
 	private historyDataRequestIndex: number = 0;
-
 	private historyActData: string = '';
 	private historyBpData: string = '';
 	private historyExcsData: string = '';
 	private historySleepData: string = '';
-
-
 	private pedometerDaySummaries: PedometerDaySummary[];
 	private pedometerTimeSegments: PedometerTimeSegment[];
 	private pedometerSleepSummaries: PedometerSleepSummary[];
 	private pedometerSleepSegments: PedometerSleepSegment[];
 	private pedometerHeartrateSegments: PedometerHeartrateSegment[];
-
 	private syncLogString: string = '';
-
-
-	connectionPromiseResponse: (value: boolean) => void = null;
-	syncPromiseResponse: (value: boolean) => void = null;
-
-	/**
-	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
-	 * @param devicename 장치명에 포함될 기기명
-	 */
-	static nameContiains(devicename: string): boolean {
-		return devicename.includes('HC92');
-	}
 
 	constructor(protected service: CordovaPedometerService, id: string, name: string, extra?: object) {
 		super(service.ble, id, name, extra);
@@ -71,6 +57,13 @@ export class Q8Device extends PedometerDeviceBase {
 		// ACK_OFFSET = 0;
 	}
 
+	/**
+	 * 이 장치의 이름이 주어진 문자열을 포함하고 있는지 여부를 반환한다.
+	 * @param devicename 장치명에 포함될 기기명
+	 */
+	static nameContiains(devicename: string): boolean {
+		return devicename.includes('HC92');
+	}
 
 	async first_connect_callback(): Promise<boolean> {
 		if (this.connectionPromiseResponse != null) {

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
 import {Observable, Subject} from 'rxjs';
-import {BloodpressureMeasurement, BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
+import {BodyscaleMeasurement} from 'autochek-base/objects/device-data-object';
 import {DeviceBase} from "autochek-device/objects/base/DeviceBase";
 
 
@@ -29,41 +29,45 @@ export const DefaultScaleUser: ScaleUser = {
 export class CordovaBodyscaleService {
 
 	/**
+	 * 측정 사용자 정보
+	 */
+	user: ScaleUser = null;
+	/**
 	 * 장치 연결 시작 Subject
 	 */
 	private emitBeginConnect: Subject<void> = new Subject<void>();
-	/**
-	 * 장치 연결 종료 Subject
-	 */
-	private emitEndConnect: Subject<void> = new Subject<void>();
-	/**
-	 * 데이터 동기화 시작 Subject
-	 */
-	private emitBeginSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
-	/**
-	 * 데이터 동기화 Subject
-	 */
-	private emitSyncData: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
-	/**
-	 * 데이터 동기화 종료 Subject
-	 */
-	private emitEndSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 장치 연결 시작 Observable
 	 */
 	onBeginConnect: Observable<void> = this.emitBeginConnect.asObservable();
 	/**
+	 * 장치 연결 종료 Subject
+	 */
+	private emitEndConnect: Subject<void> = new Subject<void>();
+	/**
 	 * 장치 연결 종료 Observable
 	 */
 	onEndConnect: Observable<void> = this.emitEndConnect.asObservable();
+	/**
+	 * 데이터 동기화 시작 Subject
+	 */
+	private emitBeginSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 데이터 동기화 시작 Observable
 	 */
 	onBeginSyncData: Observable<DeviceBase> = this.emitBeginSyncData.asObservable();
 	/**
+	 * 데이터 동기화 Subject
+	 */
+	private emitSyncData: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
+	/**
 	 * 데이터 동기화 Observable
 	 */
 	onSyncData: Observable<BodyscaleMeasurement[]> = this.emitSyncData.asObservable();
+	/**
+	 * 데이터 동기화 종료 Subject
+	 */
+	private emitEndSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 데이터 동기화 종료 Observable
 	 */
@@ -79,12 +83,17 @@ export class CordovaBodyscaleService {
 
 	}
 
-	user: ScaleUser = null;
-
+	/**
+	 * 측정 사용자 정보 설정
+	 * @param scaleUser 측정 사용자 정보
+	 */
 	setUser(scaleUser: ScaleUser) {
 		this.user = scaleUser;
 	}
 
+	/**
+	 * 측정 사용자 정보를 반환한다.
+	 */
 	getUser(): ScaleUser {
 		if (this.user) {
 			return this.user;

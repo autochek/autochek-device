@@ -9,10 +9,10 @@ import {Observable, Subject} from "rxjs";
 export class DeviceBodyscaleDual {
 
 	private emitBeginBodyscaleMeasurment: Subject<void> = new Subject<void>();
-	private emitBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
-	private emitEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
 	onBeginBodyscaleMeasurment: Observable<void> = this.emitBeginBodyscaleMeasurment.asObservable();
+	private emitBodyscaleMeasurment: Subject<BodyscaleMeasurement[]> = new Subject<BodyscaleMeasurement[]>();
 	onBodyscaleMeasurment: Observable<BodyscaleMeasurement[]> = this.emitBodyscaleMeasurment.asObservable();
+	private emitEndBodyscaleMeasurment: Subject<void> = new Subject<void>();
 	onEndBodyscaleMeasurment: Observable<void> = this.emitEndBodyscaleMeasurment.asObservable();
 
 

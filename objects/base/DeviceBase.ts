@@ -1,4 +1,4 @@
-import {Subject, Observable, ReplaySubject} from 'rxjs';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
 import {BLE} from '@ionic-native/ble/ngx';
 
 
@@ -92,14 +92,11 @@ export abstract class DeviceBase {
 
 
 	progress: Subject<string>;
-
-	protected ble: BLE;
-
-
-	private staticStatus: EnumDeviceStaticStatus = EnumDeviceStaticStatus.NotConnected;
-	private dynamicStatus: EnumDeviceDynamicStatus = EnumDeviceDynamicStatus.Idle;
 	public staticStatusSubject: ReplaySubject<EnumDeviceStaticStatus> = new ReplaySubject<EnumDeviceStaticStatus>(1);
 	public dynamicStatusSubject: ReplaySubject<EnumDeviceDynamicStatus> = new ReplaySubject<EnumDeviceDynamicStatus>(1);
+	protected ble: BLE;
+	private staticStatus: EnumDeviceStaticStatus = EnumDeviceStaticStatus.NotConnected;
+	private dynamicStatus: EnumDeviceDynamicStatus = EnumDeviceDynamicStatus.Idle;
 
 	/**
 	 * 생성자
@@ -177,6 +174,11 @@ export abstract class DeviceBase {
 		this.progress.next(msg);
 	}
 
+	abstract async first_connect_callback(): Promise<boolean>;
+
+	abstract async repeated_connect_callback(): Promise<boolean>;
+
+	abstract async sync_callback(): Promise<boolean>;
 
 	protected startNotification(serviceUUID: string, characteristicUUID: string): Observable<any> {
 		return this.ble.startNotification(this.id, serviceUUID, characteristicUUID);
@@ -193,10 +195,4 @@ export abstract class DeviceBase {
 	protected read(serviceUUID: string, characteristicUUID: string): Promise<any> {
 		return this.ble.read(this.id, serviceUUID, characteristicUUID);
 	}
-
-	abstract async first_connect_callback(): Promise<boolean>;
-
-	abstract async repeated_connect_callback(): Promise<boolean>;
-
-	abstract async sync_callback(): Promise<boolean>;
 }

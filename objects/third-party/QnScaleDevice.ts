@@ -48,6 +48,10 @@ export class QnScaleDevice extends BodyscaleDeviceBase {
 		throw new Error('Method not implemented.');
 	}
 
+	writePacket(packet: Packet) {
+		console.log('write hex : ', bufferToHex(packet.buffer), UUID_SERVICE, UUID_CHAR_WRITE);
+		this.write(UUID_SERVICE, UUID_CHAR_WRITE, packet.buffer);
+	}
 
 	private general_connect_callback() {
 		let scaleType = 0;
@@ -143,12 +147,6 @@ export class QnScaleDevice extends BodyscaleDeviceBase {
 		//     });
 	}
 
-
-	writePacket(packet: Packet) {
-		console.log('write hex : ', bufferToHex(packet.buffer), UUID_SERVICE, UUID_CHAR_WRITE);
-		this.write(UUID_SERVICE, UUID_CHAR_WRITE, packet.buffer);
-	}
-
 }
 
 function bufferToHex(buffer) {
@@ -193,10 +191,6 @@ interface Packet {
 }
 
 class Packet {
-	public static generate(cmd: number, devicetype: number, value: string): Packet {
-		return new Packet().set(cmd, devicetype, value);
-	}
-
 	constructor(buffer?: ArrayBuffer) {
 		if (!buffer) {
 			return;
@@ -209,6 +203,10 @@ class Packet {
 		this.devicetype = int8[2];
 		this.value = bufferToHex(buffer.slice(3, buffer.byteLength - 1));
 		this.checksum = int8[int8.length - 1];
+	}
+
+	public static generate(cmd: number, devicetype: number, value: string): Packet {
+		return new Packet().set(cmd, devicetype, value);
 	}
 
 	public set(cmd: number, devicetype: number, value: string | number[]): Packet {

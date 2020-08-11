@@ -2,14 +2,7 @@ import {Injectable} from '@angular/core';
 import {BLE} from '@ionic-native/ble/ngx';
 
 import {Observable, Subject} from 'rxjs';
-import {
-	GlucosemeterMeasurement,
-	PedometerDaySummary,
-	PedometerHeartrateSegment, PedometerMeasurement,
-	PedometerSleepSegment,
-	PedometerSleepSummary,
-	PedometerTimeSegment
-} from 'autochek-base/objects/device-data-object';
+import {PedometerMeasurement} from 'autochek-base/objects/device-data-object';
 import {DeviceBase} from "autochek-device/objects/base/DeviceBase";
 
 
@@ -35,42 +28,43 @@ export const DefaultPedometerUser: PedometerUser = {
 @Injectable()
 export class CordovaPedometerService {
 
+	user: PedometerUser = null;
 	/**
 	 * 장치 연결 시작 Subject
 	 */
 	private emitBeginConnect: Subject<void> = new Subject<void>();
 	/**
-	 * 장치 연결 종료 Subject
-	 */
-	private emitEndConnect: Subject<void> = new Subject<void>();
-	/**
-	 * 데이터 동기화 시작 Subject
-	 */
-	private emitBeginSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
-	/**
-	 * 데이터 동기화 Subject
-	 */
-	private emitSyncData: Subject<PedometerMeasurement[]> = new Subject<PedometerMeasurement[]>();
-	/**
-	 * 데이터 동기화 종료 Subject
-	 */
-	private emitEndSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
-	/**
 	 * 장치 연결 시작 Observable
 	 */
 	onBeginConnect: Observable<void> = this.emitBeginConnect.asObservable();
+	/**
+	 * 장치 연결 종료 Subject
+	 */
+	private emitEndConnect: Subject<void> = new Subject<void>();
 	/**
 	 * 장치 연결 종료 Observable
 	 */
 	onEndConnect: Observable<void> = this.emitEndConnect.asObservable();
 	/**
+	 * 데이터 동기화 시작 Subject
+	 */
+	private emitBeginSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
+	/**
 	 * 데이터 동기화 시작 Observable
 	 */
 	onBeginSyncData: Observable<DeviceBase> = this.emitBeginSyncData.asObservable();
 	/**
+	 * 데이터 동기화 Subject
+	 */
+	private emitSyncData: Subject<PedometerMeasurement[]> = new Subject<PedometerMeasurement[]>();
+	/**
 	 * 데이터 동기화 Observable
 	 */
 	onSyncData: Observable<PedometerMeasurement[]> = this.emitSyncData.asObservable();
+	/**
+	 * 데이터 동기화 종료 Subject
+	 */
+	private emitEndSyncData: Subject<DeviceBase> = new Subject<DeviceBase>();
 	/**
 	 * 데이터 동기화 종료 Observable
 	 */
@@ -86,8 +80,6 @@ export class CordovaPedometerService {
 
 	}
 
-	user: PedometerUser = null;
-
 	setUser(scaleUser: PedometerUser) {
 		this.user = scaleUser;
 	}
@@ -97,13 +89,6 @@ export class CordovaPedometerService {
 			return this.user;
 		}
 		return DefaultPedometerUser;
-	}
-
-	private arraytize(data: any | any[]): any[] {
-		if (!Array.isArray(data)) {
-			data = [data];
-		}
-		return data;
 	}
 
 	/**
@@ -145,6 +130,13 @@ export class CordovaPedometerService {
 			measurements = [measurements];
 		}
 		this.emitSyncData.next(measurements);
+	}
+
+	private arraytize(data: any | any[]): any[] {
+		if (!Array.isArray(data)) {
+			data = [data];
+		}
+		return data;
 	}
 
 }
