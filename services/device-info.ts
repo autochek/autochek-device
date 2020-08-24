@@ -704,9 +704,7 @@ export class DeviceInfoProvider {
 
 		for (const devicetype of devicetypeList) {
 			// console.log(devicetype, storageData[devicetype]);
-			for (const d of storageData[devicetype]) {
-				const dis = storageData[devicetype][d];
-				// console.log('looking for devicetype:', devicetype, dis);
+			for (const dis of storageData[devicetype]) {
 
 				const constructors = deviceList[devicetype];
 
